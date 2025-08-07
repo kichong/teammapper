@@ -1,13 +1,5 @@
 import { ExportNodeProperties, NodeProperties, UserNodeProperties } from './models/node'
 import { ExportHistory, MapSnapshot } from './handlers/history'
-
-interface MapConnection {
-  id: string
-  from: string
-  to: string
-  color?: string | null
-  width?: number | null
-}
 import { DefaultNodeProperties, OptionParameters } from './options'
 
 interface MapCreateEvent {
@@ -19,7 +11,6 @@ interface MapProperties {
     lastModified: number,
     createdAt: number,
     data: MapSnapshot,
-    connections: MapConnection[],
     deletedAt: number,
     deleteAfterDays: number
 }
@@ -36,7 +27,6 @@ export {
     ExportNodeProperties,
     MapCreateEvent,
     MapProperties,
-    MapConnection,
     MapSnapshot,
     NodeProperties,
     NodeUpdateEvent,

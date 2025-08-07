@@ -1,4 +1,4 @@
-import { MapSnapshot, ExportNodeProperties, MapConnection } from '@mmp/map/types';
+import { MapSnapshot, ExportNodeProperties } from '@mmp/map/types';
 import { CachedMapOptions } from 'src/app/shared/models/cached-map.model';
 
 interface ResponseServer {
@@ -48,14 +48,6 @@ interface ResponseNodeRemoved extends ResponseServer {
   nodeId: string;
 }
 
-interface ResponseConnectionAdded extends ResponseServer {
-  connection: MapConnection;
-}
-
-interface ResponseConnectionRemoved extends ResponseServer {
-  connectionId: string;
-}
-
 interface ResponseSelectionUpdated extends ResponseServer {
   nodeId: string;
   selected: boolean;
@@ -67,7 +59,6 @@ interface ServerMap {
   deletedAt: string;
   deleteAfterDays: number;
   data: MapSnapshot;
-  connections: MapConnection[];
   options: CachedMapOptions;
   createdAt: string;
 }
@@ -111,8 +102,6 @@ export {
   ResponseNodeUpdated,
   ResponseSelectionUpdated,
   ResponseClientNotification,
-  ResponseConnectionAdded,
-  ResponseConnectionRemoved,
   ServerMap,
   PrivateServerMap,
   ReversePropertyMapping,

@@ -14,7 +14,6 @@ import {
   MapCreateEvent,
   MapProperties,
   NodeUpdateEvent,
-  MapConnection,
 } from '@mmp/map/types';
 import {
   PrivateServerMap,
@@ -28,8 +27,6 @@ import {
   ServerMap,
   ResponseUndoRedoChanges,
   ReversePropertyMapping,
-  ResponseConnectionAdded,
-  ResponseConnectionRemoved,
 } from './server-types';
 import { API_URL, HttpService } from '../../http/http.service';
 import { COLORS } from '../mmp/mmp-utils';
@@ -38,7 +35,6 @@ import { StorageService } from '../storage/storage.service';
 import { SettingsService } from '../settings/settings.service';
 import { ToastrService } from 'ngx-toastr';
 import { MapDiff } from '@mmp/map/handlers/history';
-import { v4 as uuidv4 } from 'uuid';
 
 const DEFAULT_COLOR = '#000000';
 const DEFAULT_SELF_COLOR = '#c0c0c0';
@@ -159,9 +155,7 @@ export class MapSyncService implements OnDestroy {
   }
 
   public initMap() {
-    const cached = this.getAttachedMap().cachedMap;
-    this.mmpService.new(cached.data);
-    this.mmpService.loadConnections(cached.connections);
+    this.mmpService.new(this.getAttachedMap().cachedMap.data);
     this.attachedNodeSubject.next(
       this.mmpService.selectNode(this.mmpService.getRootNode().id)
     );
@@ -208,7 +202,6 @@ export class MapSyncService implements OnDestroy {
 
     const cachedMap: CachedMap = {
       data: this.mmpService.exportAsJSON(),
-      connections: this.mmpService.exportConnections(),
       lastModified: Date.now(),
       createdAt: cachedMapEntry.cachedMap.createdAt,
       uuid: cachedMapEntry.cachedMap.uuid,
@@ -273,37 +266,6 @@ export class MapSyncService implements OnDestroy {
       node: removedNode,
       modificationSecret: this.modificationSecret,
     });
-  }
-
-  public addConnection(connection: MapConnection) {
-    this.mmpService.addConnection(connection);
-    this.socket.emit('addConnection', {
-      mapId: this.getAttachedMap().cachedMap.uuid,
-      connection,
-      modificationSecret: this.modificationSecret,
-    });
-    this.updateAttachedMap();
-  }
-
-  public removeConnection(connectionId: string) {
-    this.mmpService.removeConnection(connectionId);
-    this.socket.emit('removeConnection', {
-      mapId: this.getAttachedMap().cachedMap.uuid,
-      connectionId,
-      modificationSecret: this.modificationSecret,
-    });
-    this.updateAttachedMap();
-  }
-
-  public connectNodes(fromNode: string, toNode: string) {
-    const connection: MapConnection = {
-      id: uuidv4(),
-      from: fromNode,
-      to: toNode,
-      color: null,
-      width: null,
-    };
-    this.addConnection(connection);
   }
 
   public applyMapChangesByDiff(diff: MapDiff) {
@@ -425,7 +387,6 @@ export class MapSyncService implements OnDestroy {
 
       this.setConnectionStatusSubject('connected');
       this.mmpService.new(serverMap.data, false);
-      this.mmpService.loadConnections(serverMap.connections);
     });
 
     this.socket.on(
@@ -474,29 +435,10 @@ export class MapSyncService implements OnDestroy {
       );
     });
 
-    this.socket.on(
-      'connectionAdded',
-      (result: ResponseConnectionAdded) => {
-        if (result.clientId === this.socket.id) return;
-        this.mmpService.addConnection(result.connection);
-        this.updateAttachedMap();
-      }
-    );
-
-    this.socket.on(
-      'connectionRemoved',
-      (result: ResponseConnectionRemoved) => {
-        if (result.clientId === this.socket.id) return;
-        this.mmpService.removeConnection(result.connectionId);
-        this.updateAttachedMap();
-      }
-    );
-
     this.socket.on('mapUpdated', (result: ResponseMapUpdated) => {
       if (result.clientId === this.socket.id) return;
 
       this.mmpService.new(result.map.data, false);
-      this.mmpService.loadConnections(result.map.connections);
     });
 
     this.socket.on('mapChangesUndoRedo', (result: ResponseUndoRedoChanges) => {
@@ -585,9 +527,7 @@ export class MapSyncService implements OnDestroy {
 
       const removedNodeId = result.nodeId;
       if (this.mmpService.existNode(removedNodeId)) {
-        this.mmpService.removeConnectionsForNode(removedNodeId);
         this.mmpService.removeNode(removedNodeId, false);
-        this.updateAttachedMap();
       }
     });
 
@@ -710,7 +650,6 @@ export class MapSyncService implements OnDestroy {
     this.mmpService.on('nodeUpdate').subscribe((result: NodeUpdateEvent) => {
       this.attachedNodeSubject.next(result.nodeProperties);
       this.updateNode(result);
-      this.mmpService.updateConnections();
       this.updateAttachedMap();
     });
 
@@ -747,7 +686,6 @@ export class MapSyncService implements OnDestroy {
     this.mmpService
       .on('nodeRemove')
       .subscribe((removedNode: ExportNodeProperties) => {
-        this.mmpService.removeConnectionsForNode(removedNode.id);
         this.removeNode(removedNode);
         this.updateAttachedMap();
       });
