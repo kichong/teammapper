@@ -1,6 +1,12 @@
 import { MmpMap } from '../entities/mmpMap.entity'
 import { MmpNode } from '../entities/mmpNode.entity'
-import { IMmpClientMap, IMmpClientNode, IMmpClientNodeBasics } from '../types'
+import { MmpConnection } from '../entities/mmpConnection.entity'
+import {
+  IMmpClientMap,
+  IMmpClientNode,
+  IMmpClientNodeBasics,
+  IMmpClientConnection,
+} from '../types'
 
 const DEFAULT_COLOR_NAME = '#787878'
 const DEFAULT_COLOR_BACKGROUND = '#f0f6f5'
@@ -37,15 +43,27 @@ const mapMmpNodeToClient = (serverNode: MmpNode): IMmpClientNode => ({
   isRoot: serverNode.root || false,
 })
 
+const mapMmpConnectionToClient = (
+  serverConnection: MmpConnection
+): IMmpClientConnection => ({
+  id: serverConnection.id,
+  from: serverConnection.fromNodeId,
+  to: serverConnection.toNodeId,
+  color: serverConnection.color,
+  width: serverConnection.width,
+})
+
 const mapMmpMapToClient = (
   serverMap: MmpMap,
   serverNodes: MmpNode[],
+  serverConnections: MmpConnection[],
   deletedAt: Date,
   deleteAfterDays: number
 ): IMmpClientMap => {
   return {
     uuid: serverMap.id,
     data: serverNodes.map((node) => mapMmpNodeToClient(node)),
+    connections: serverConnections.map((c) => mapMmpConnectionToClient(c)),
     deleteAfterDays,
     deletedAt,
     lastModified: serverMap.lastModified,
@@ -106,6 +124,18 @@ const mapClientNodeToMmpNode = (
   nodeMapId: mapId,
 })
 
+const mapClientConnectionToMmpConnection = (
+  clientConnection: IMmpClientConnection,
+  mapId: string
+): Partial<MmpConnection> => ({
+  id: clientConnection.id,
+  fromNodeId: clientConnection.from,
+  toNodeId: clientConnection.to,
+  color: clientConnection.color || null,
+  width: clientConnection.width || null,
+  mapId,
+})
+
 // Maps and enhances given properties to a valid root node
 const mapClientBasicNodeToMmpRootNode = (
   clientRootNodeBasics: IMmpClientNodeBasics,
@@ -134,4 +164,5 @@ export {
   mapClientBasicNodeToMmpRootNode,
   mapMmpMapToClient,
   mergeClientNodeIntoMmpNode,
+  mapClientConnectionToMmpConnection,
 }

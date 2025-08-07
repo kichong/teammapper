@@ -7,6 +7,7 @@ import {
 } from 'typeorm'
 import { MapOptions } from '../types'
 import { MmpNode } from './mmpNode.entity'
+import { MmpConnection } from './mmpConnection.entity'
 
 @Entity()
 export class MmpMap {
@@ -44,6 +45,11 @@ export class MmpMap {
     cascade: true,
   })
   nodes: MmpNode[]
+
+  @OneToMany(() => MmpConnection, (connection) => connection.map, {
+    cascade: true,
+  })
+  connections: MmpConnection[]
 
   @Column({
     type: 'timestamptz',

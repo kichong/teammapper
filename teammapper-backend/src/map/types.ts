@@ -28,6 +28,7 @@ export interface IMmpClientMap {
   deleteAfterDays: number
   deletedAt: Date
   data: IMmpClientNode[]
+  connections: IMmpClientConnection[]
   options: IMmpClientMapOptions
   createdAt: Date | null
 }
@@ -89,6 +90,23 @@ export interface IMmpClientNodeRequest extends IMmpClientEditingRequest {
 
 export interface IMmpClientNodeAddRequest extends IMmpClientEditingRequest {
   nodes: IMmpClientNode[]
+}
+
+export interface IMmpClientConnection {
+  id: string
+  from: string
+  to: string
+  color: string | null
+  width: number | null
+}
+
+export interface IMmpClientConnectionRequest extends IMmpClientEditingRequest {
+  connection: IMmpClientConnection
+}
+
+export interface IMmpClientConnectionRemoveRequest
+  extends IMmpClientEditingRequest {
+  connectionId: string
 }
 
 export interface IMmpClientUpdateMapOptionsRequest
