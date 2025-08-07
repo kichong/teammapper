@@ -24,8 +24,6 @@ import {
   IMmpClientNodeSelectionRequest,
   IMmpClientUndoRedoRequest,
   IMmpClientUpdateMapOptionsRequest,
-  IMmpClientConnectionRequest,
-  IMmpClientConnectionRemoveRequest,
 } from '../types'
 import { mapMmpNodeToClient } from '../utils/clientServerMapping'
 import { MmpMap } from '../entities/mmpMap.entity'
@@ -259,38 +257,6 @@ export class MapsGateway implements OnGatewayDisconnect {
     })
 
     return removedNode
-  }
-
-  @UseGuards(EditGuard)
-  @SubscribeMessage('addConnection')
-  async addConnection(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() request: IMmpClientConnectionRequest
-  ): Promise<boolean> {
-    const newConn = await this.mapsService.addConnectionFromClient(
-      request.mapId,
-      request.connection
-    )
-    if (!newConn) return false
-    this.server.to(request.mapId).emit('connectionAdded', {
-      clientId: client.id,
-      connection: request.connection,
-    })
-    return true
-  }
-
-  @UseGuards(EditGuard)
-  @SubscribeMessage('removeConnection')
-  async removeConnection(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() request: IMmpClientConnectionRemoveRequest
-  ): Promise<boolean> {
-    await this.mapsService.removeConnection(request.connectionId, request.mapId)
-    this.server.to(request.mapId).emit('connectionRemoved', {
-      clientId: client.id,
-      connectionId: request.connectionId,
-    })
-    return true
   }
 
   @SubscribeMessage('updateNodeSelection')

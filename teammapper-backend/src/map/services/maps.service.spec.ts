@@ -4,7 +4,6 @@ import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm'
 import { Logger } from '@nestjs/common'
 import { MmpMap } from '../entities/mmpMap.entity'
 import { MmpNode } from '../entities/mmpNode.entity'
-import { MmpConnection } from '../entities/mmpConnection.entity'
 import { Repository } from 'typeorm'
 import { ConfigModule } from '@nestjs/config'
 import AppModule from '../../app.module'
@@ -20,7 +19,6 @@ describe('MapsController', () => {
   let mapsService: MapsService
   let nodesRepo: Repository<MmpNode>
   let mapsRepo: Repository<MmpMap>
-  let connectionsRepo: Repository<MmpConnection>
   let moduleFixture: TestingModule
 
   beforeAll(async () => {
@@ -42,11 +40,8 @@ describe('MapsController', () => {
     nodesRepo = moduleFixture.get<Repository<MmpNode>>(
       getRepositoryToken(MmpNode)
     )
-    connectionsRepo = moduleFixture.get<Repository<MmpConnection>>(
-      getRepositoryToken(MmpConnection)
-    )
 
-    mapsService = new MapsService(nodesRepo, mapsRepo, connectionsRepo)
+    mapsService = new MapsService(nodesRepo, mapsRepo)
   })
 
   afterAll(async () => {
