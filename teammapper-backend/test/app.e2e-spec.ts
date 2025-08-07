@@ -113,6 +113,7 @@ describe('AppController (e2e)', () => {
             isRoot: true,
           },
         ],
+        connections: [],
       }
       socket.emit(
         'updateMap',

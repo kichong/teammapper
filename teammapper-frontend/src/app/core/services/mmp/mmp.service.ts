@@ -1,5 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
+import * as d3 from 'd3';
 import { SettingsService } from '../settings/settings.service';
 import { ToastrService } from 'ngx-toastr';
 import { UtilsService } from '../utils/utils.service';
@@ -7,6 +8,7 @@ import { jsPDF } from 'jspdf';
 import { first } from 'rxjs/operators';
 import * as mmp from '@mmp/index';
 import MmpMap from '@mmp/map/map';
+import { MapConnection } from '@mmp/map/types';
 import DOMPurify from 'dompurify';
 import {
   ExportHistory,
@@ -27,6 +29,7 @@ import { validate as uuidValidate } from 'uuid';
 })
 export class MmpService implements OnDestroy {
   private currentMap: MmpMap;
+  private connections: MapConnection[];
 
   private readonly branchColors: string[];
   // additional options that are not handled within mmp, like fontMaxSize etc.
@@ -40,6 +43,7 @@ export class MmpService implements OnDestroy {
   ) {
     this.additionalOptions = null;
     this.branchColors = COLORS;
+    this.connections = [];
 
     this.settingsSubscription = settingsService
       .getEditModeObservable()
@@ -98,6 +102,7 @@ export class MmpService implements OnDestroy {
       return;
     }
 
+    this.clearConnections();
     const mapWithCoordinates =
       this.currentMap.instance.applyCoordinatesToMapSnapshot(map);
     this.currentMap.instance.new(mapWithCoordinates, notifyWithEvent);
@@ -286,6 +291,66 @@ export class MmpService implements OnDestroy {
    */
   public existNode(nodeId: string): boolean {
     return this.currentMap.instance.existNode(nodeId);
+  }
+
+  public addConnection(connection: MapConnection) {
+    this.drawConnection(connection);
+    this.connections.push(connection);
+  }
+
+  public loadConnections(connections: MapConnection[]) {
+    this.clearConnections();
+    connections?.forEach((c) => this.addConnection(c));
+  }
+
+  public removeConnection(id: string) {
+    d3.select(this.currentMap.dom.g).select(`#${id}`).remove();
+    this.connections = this.connections.filter((c) => c.id !== id);
+  }
+
+  public removeConnectionsForNode(nodeId: string) {
+    const toRemove = this.connections.filter(
+      (c) => c.from === nodeId || c.to === nodeId
+    );
+    toRemove.forEach((c) => this.removeConnection(c.id));
+  }
+
+  public exportConnections(): MapConnection[] {
+    return this.connections;
+  }
+
+  public clearConnections() {
+    this.connections.forEach((c) =>
+      d3.select(this.currentMap.dom.g).select(`#${c.id}`).remove()
+    );
+    this.connections = [];
+  }
+
+  public updateConnections() {
+    this.connections.forEach((c) => this.drawConnection(c, true));
+  }
+
+  private drawConnection(connection: MapConnection, redraw = false) {
+    const from = this.getNode(connection.from);
+    const to = this.getNode(connection.to);
+    if (!from || !to) return;
+    let line = d3.select(this.currentMap.dom.g).select(`#${connection.id}`);
+    if (line.empty()) {
+      line = d3
+        .select(this.currentMap.dom.g)
+        .append('line')
+        .attr('id', connection.id)
+        .attr('stroke', connection.color || '#000')
+        .attr('stroke-width', connection.width || 2);
+    }
+    line
+      .attr('x1', from.coordinates.x)
+      .attr('y1', from.coordinates.y)
+      .attr('x2', to.coordinates.x)
+      .attr('y2', to.coordinates.y);
+    if (!redraw) {
+      line.lower();
+    }
   }
 
   /**

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { MmpMap } from '../entities/mmpMap.entity'
 import { MmpNode } from '../entities/mmpNode.entity'
+import { MmpConnection } from '../entities/mmpConnection.entity'
 import {
   IMmpClientMap,
   IMmpClientMapOptions,
@@ -10,12 +11,14 @@ import {
   IMmpClientNodeBasics,
   IMmpClientMapDiff,
   IMmpClientSnapshotChanges,
+  IMmpClientConnection,
 } from '../types'
 import {
   mapClientBasicNodeToMmpRootNode,
   mapClientNodeToMmpNode,
   mapMmpMapToClient,
   mergeClientNodeIntoMmpNode,
+  mapClientConnectionToMmpConnection,
 } from '../utils/clientServerMapping'
 import configService from '../../config.service'
 import { validate as uuidValidate } from 'uuid'
@@ -29,7 +32,9 @@ export class MapsService {
     @InjectRepository(MmpNode)
     private nodesRepository: Repository<MmpNode>,
     @InjectRepository(MmpMap)
-    private mapsRepository: Repository<MmpMap>
+    private mapsRepository: Repository<MmpMap>,
+    @InjectRepository(MmpConnection)
+    private connectionsRepository: Repository<MmpConnection>
   ) {}
 
   findMap(uuid: string): Promise<MmpMap | null> {
@@ -59,11 +64,12 @@ export class MapsService {
     }
 
     const nodes = await this.findNodes(map?.id)
+    const connections = await this.findConnections(map?.id)
     const days = configService.deleteAfterDays()
     const deletedAt = await this.getDeletedAt(map, days)
 
     if (deletedAt) {
-      return mapMmpMapToClient(map, nodes, deletedAt, days)
+      return mapMmpMapToClient(map, nodes, connections, deletedAt, days)
     }
   }
 
@@ -157,12 +163,75 @@ export class MapsService {
     return nodes.reduce(reducer, Promise.resolve(new Array<MmpNode>()))
   }
 
+  async addConnection(mapId: string, connection: MmpConnection) {
+    if (!mapId || !connection) {
+      this.logger.warn(`addConnection(): missing arguments`)
+      return
+    }
+    const newConn = this.connectionsRepository.create({
+      ...connection,
+      mapId,
+    })
+    try {
+      return await this.connectionsRepository.save(newConn)
+    } catch (error) {
+      this.logger.warn(
+        `${error.constructor.name} addConnection(): Failed to add connection ${newConn.id}: ${error}`
+      )
+      return Promise.reject(error)
+    }
+  }
+
+  async addConnectionFromClient(
+    mapId: string,
+    clientConnection: IMmpClientConnection
+  ) {
+    const mmpConn = mapClientConnectionToMmpConnection(clientConnection, mapId)
+    return this.addConnection(mapId, mmpConn as MmpConnection)
+  }
+
+  async addConnections(
+    mapId: string,
+    connections: Partial<MmpConnection>[]
+  ): Promise<MmpConnection[] | []> {
+    if (!mapId || connections.length === 0) return []
+    const created: MmpConnection[] = []
+    for (const conn of connections) {
+      const newConn = await this.addConnection(mapId, conn as MmpConnection)
+      if (newConn) created.push(newConn)
+    }
+    return created
+  }
+
+  async addConnectionsFromClient(
+    mapId: string,
+    clientConnections: IMmpClientConnection[]
+  ) {
+    const mmpConns = clientConnections.map((c) =>
+      mapClientConnectionToMmpConnection(c, mapId)
+    )
+    return this.addConnections(mapId, mmpConns)
+  }
+
+  async removeConnection(connectionId: string, mapId: string) {
+    const existing = await this.connectionsRepository.findOne({
+      where: { id: connectionId, mapId },
+    })
+    if (existing) {
+      await this.connectionsRepository.remove(existing)
+    }
+  }
+
   async findNodes(mapId: string): Promise<MmpNode[]> {
     return this.nodesRepository
       .createQueryBuilder('mmpNode')
       .where('mmpNode.nodeMapId = :mapId', { mapId })
       .orderBy('mmpNode.orderNumber', 'ASC')
       .getMany()
+  }
+
+  async findConnections(mapId: string): Promise<MmpConnection[]> {
+    return this.connectionsRepository.find({ where: { mapId } })
   }
 
   async existsNode(mapId: string, parentId: string): Promise<boolean> {
@@ -243,8 +312,13 @@ export class MapsService {
   async updateMap(clientMap: IMmpClientMap): Promise<MmpMap | null> {
     // remove existing nodes, otherwise we will end up with multiple roots
     await this.nodesRepository.delete({ nodeMapId: clientMap.uuid })
+    await this.connectionsRepository.delete({ mapId: clientMap.uuid })
     // Add new nodes from given map
     await this.addNodesFromClient(clientMap.uuid, clientMap.data)
+    await this.addConnectionsFromClient(
+      clientMap.uuid,
+      clientMap.connections || []
+    )
     // reload map
     return this.findMap(clientMap.uuid)
   }
