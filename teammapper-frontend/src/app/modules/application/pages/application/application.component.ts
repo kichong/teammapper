@@ -29,9 +29,10 @@ import { LinksService } from '../../../../core/services/links/links.service';
 export class ApplicationComponent implements OnInit, OnDestroy {
   public node: Observable<ExportNodeProperties>;
   public editMode: Observable<boolean>;
-  public links: Link[] = []; // stored links
-  public linkingFrom: string | null = null; // first selected node
+  public selectedNodeId: string | null = null; // first selected node
   public cursor: { x: number; y: number } | null = null; // cursor while linking
+
+  private highlightedEl: HTMLElement | null = null; // element with outline
 
   private imageDropSubscription: Subscription;
   private connectionStatusSubscription: Subscription;
@@ -65,13 +66,10 @@ export class ApplicationComponent implements OnInit, OnDestroy {
       });
     this.editMode = this.settingsService.getEditModeObservable();
 
-    // keep links updated
-    this.linksService.links$.subscribe(links => (this.links = links));
     // reset selection when link mode is turned off
     this.linksService.linkMode$.subscribe(active => {
       if (!active) {
-        this.linkingFrom = null;
-        this.cursor = null;
+        this.clearSelection();
       }
     });
   }
@@ -146,20 +144,34 @@ export class ApplicationComponent implements OnInit, OnDestroy {
     if (!this.linksService.isLinkModeActive()) return;
     const nodeId = this.findNodeId(event.target as HTMLElement);
     if (!nodeId) return;
-    if (!this.linkingFrom) {
-      this.linkingFrom = nodeId;
-    } else if (this.linkingFrom !== nodeId) {
-      this.linksService.addLink(this.linkingFrom, nodeId);
-      this.linkingFrom = null;
-      this.cursor = null;
+    if (!this.selectedNodeId) {
+      this.selectedNodeId = nodeId;
+      this.highlight(nodeId);
+    } else {
+      if (this.selectedNodeId !== nodeId) {
+        let from = this.selectedNodeId;
+        let to = nodeId;
+        if (from > to) [from, to] = [to, from];
+        const link: Link = { id: `${from}-${to}`, from, to };
+        this.linksService.add(link);
+      }
+      this.clearSelection();
     }
   }
 
   // Track the cursor for the temporary line
   @HostListener('document:mousemove', ['$event'])
   public onDocumentMove(event: MouseEvent) {
-    if (this.linkingFrom) {
+    if (this.selectedNodeId) {
       this.cursor = { x: event.clientX, y: event.clientY };
+    }
+  }
+
+  // Cancel linking with Escape
+  @HostListener('document:keydown', ['$event'])
+  public onKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      this.clearSelection();
     }
   }
 
@@ -175,5 +187,31 @@ export class ApplicationComponent implements OnInit, OnDestroy {
       el = el.parentElement;
     }
     return null;
+  }
+
+  // Highlight a node to show selection
+  private highlight(id: string) {
+    this.clearHighlight();
+    const el = document.querySelector(
+      `[data-node-id='${id}'], [data-id='${id}'], #${id}`
+    ) as HTMLElement;
+    if (el) {
+      this.highlightedEl = el;
+      el.style.outline = '2px solid #1976d2';
+    }
+  }
+
+  // Remove any highlight and reset selection
+  private clearSelection() {
+    this.clearHighlight();
+    this.selectedNodeId = null;
+    this.cursor = null;
+  }
+
+  private clearHighlight() {
+    if (this.highlightedEl) {
+      this.highlightedEl.style.outline = '';
+      this.highlightedEl = null;
+    }
   }
 }

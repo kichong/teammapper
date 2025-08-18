@@ -12,8 +12,8 @@ import { LinksService } from 'src/app/core/services/links/links.service';
   standalone: false,
 })
 export class LinksLayerComponent {
-  @Input() links: Link[] = []; // all saved links
-  @Input() linkingFrom: string | null = null; // node chosen first
+  public links: Link[] = []; // all saved links
+  @Input() selectedNodeId: string | null = null; // node chosen first
   @Input() cursor: { x: number; y: number } | null = null; // cursor while linking
 
   public hovered: string | null = null; // id of hovered link
@@ -21,7 +21,9 @@ export class LinksLayerComponent {
   constructor(
     private elementRef: ElementRef<HTMLElement>,
     private linksService: LinksService
-  ) {}
+  ) {
+    this.linksService.links$.subscribe(links => (this.links = links));
+  }
 
   /** Get the center position of a node on screen relative to map. */
   public getPos(id: string): { x: number; y: number } {
@@ -47,6 +49,6 @@ export class LinksLayerComponent {
 
   /** Remove link when user clicks the small x. */
   public delete(id: string) {
-    this.linksService.removeLink(id);
+    this.linksService.remove(id);
   }
 }
