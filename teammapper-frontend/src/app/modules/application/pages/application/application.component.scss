@@ -10,7 +10,5 @@ div.teammapper-application {
 
   teammapper-map {
     height: 100%;
-    position: relative; // stack above links layer
-    z-index: 1; // ensure map overlays links layer
   }
 }
