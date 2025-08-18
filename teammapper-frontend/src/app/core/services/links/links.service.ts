@@ -41,23 +41,17 @@ export class LinksService {
   }
 
   /** Add a link from one node to another. */
-  public addLink(from: string, to: string): void {
-    if (from === to) return; // no self link
-
-    // sort ids so A-B and B-A are treated the same
-    if (from > to) [from, to] = [to, from];
-    const id = `${from}-${to}`;
-
+  public add(link: Link): void {
     const links = this.linksSubject.getValue();
-    if (links.find(l => l.id === id)) return; // avoid duplicates
+    if (links.find(l => l.id === link.id)) return; // avoid duplicates
 
-    const newLinks = [...links, { id, from, to }];
+    const newLinks = [...links, link];
     this.linksSubject.next(newLinks);
     this.save(newLinks);
   }
 
   /** Remove a link by its id. */
-  public removeLink(id: string): void {
+  public remove(id: string): void {
     const newLinks = this.linksSubject.getValue().filter(l => l.id !== id);
     this.linksSubject.next(newLinks);
     this.save(newLinks);

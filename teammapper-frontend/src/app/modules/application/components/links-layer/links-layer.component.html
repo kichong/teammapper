@@ -22,9 +22,9 @@
   </ng-container>
 
   <line
-    *ngIf="linkingFrom && cursor"
-    [attr.x1]="getPos(linkingFrom).x"
-    [attr.y1]="getPos(linkingFrom).y"
+    *ngIf="selectedNodeId && cursor"
+    [attr.x1]="getPos(selectedNodeId).x"
+    [attr.y1]="getPos(selectedNodeId).y"
     [attr.x2]="cursorPos.x"
     [attr.y2]="cursorPos.y"
     class="temp"
