@@ -1,4 +1,5 @@
-<svg class="links-svg">
+<svg class="links-svg" width="100%" height="100%">
+  <!-- area where link lines are drawn -->
   <ng-container *ngFor="let link of links">
     <g (mouseenter)="hovered = link.id" (mouseleave)="hovered = null">
       <line
