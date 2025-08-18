@@ -3,7 +3,12 @@ div.teammapper-application {
   display: flex;
   flex-direction: column;
 
-  teammapper-map {
+  .map-wrapper {
+    position: relative;
     flex: 1;
+  }
+
+  teammapper-map {
+    height: 100%;
   }
 }

@@ -1,0 +1,29 @@
+:host {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; // let the map below handle normal clicks
+}
+
+line {
+  stroke: #666;
+  stroke-width: 2;
+}
+
+line.hovered {
+  stroke: #1976d2; // blue when hovered
+}
+
+line.temp {
+  stroke-dasharray: 4; // dashed temporary line
+}
+
+text.delete {
+  fill: #d32f2f;
+  font-size: 12px;
+  cursor: pointer;
+  pointer-events: all; // allow click
+  user-select: none;
+}

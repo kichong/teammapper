@@ -3,6 +3,7 @@ import { ExportNodeProperties } from '@mmp/map/types';
 import { TranslateService } from '@ngx-translate/core';
 import { DialogService } from 'src/app/core/services/dialog/dialog.service';
 import { MmpService } from 'src/app/core/services/mmp/mmp.service';
+import { LinksService } from 'src/app/core/services/links/links.service';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -19,7 +20,8 @@ export class ToolbarComponent {
   constructor(
     private translationService: TranslateService,
     public mmpService: MmpService,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    public linksService: LinksService
   ) {}
 
   public async exportMap(format: string) {

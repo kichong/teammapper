@@ -20,6 +20,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { DialogImportMermaidComponent } from './components/dialog-import-mermaid/dialog-import-mermaid.component';
+import { LinksLayerComponent } from './components/links-layer/links-layer.component';
 
 @NgModule({
   imports: [
@@ -41,6 +42,7 @@ import { DialogImportMermaidComponent } from './components/dialog-import-mermaid
     MapComponent,
     SliderPanelsComponent,
     ToolbarComponent,
+    LinksLayerComponent,
     DialogConnectionInfoComponent,
     DialogShareComponent,
     DialogImportMermaidComponent,

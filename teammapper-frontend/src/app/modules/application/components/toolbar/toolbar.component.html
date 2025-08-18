@@ -130,6 +130,14 @@
     mat-icon-button>
     <mat-icon>{{ hasHiddenNodes ? 'visibility_off' : 'visibility' }}</mat-icon>
   </button>
+  <button
+    (click)="linksService.toggleLinkMode()"
+    [title]="'Link mode'"
+    [disabled]="editDisabled"
+    [color]="(linksService.linkMode$ | async) ? 'accent' : 'primary'"
+    mat-icon-button>
+    <mat-icon>timeline</mat-icon>
+  </button>
 
   <div class="vertical-line">
     <div></div>

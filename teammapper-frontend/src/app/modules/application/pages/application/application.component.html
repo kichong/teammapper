@@ -15,5 +15,12 @@
     [node]="node | async"
     [editDisabled]="editMode | async | inverseBool"></teammapper-toolbar>
 
-  <teammapper-map></teammapper-map>
+  <div class="map-wrapper">
+    <teammapper-map></teammapper-map>
+    <teammapper-links-layer
+      [links]="links"
+      [linkingFrom]="linkingFrom"
+      [cursor]="cursor"
+    ></teammapper-links-layer>
+  </div>
 </div>
