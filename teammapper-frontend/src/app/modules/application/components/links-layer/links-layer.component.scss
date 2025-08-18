@@ -5,6 +5,7 @@
   width: 100%;
   height: 100%;
   pointer-events: none; // let the map below handle normal clicks
+  z-index: 0; // place below the map
 }
 
 .links-svg {
