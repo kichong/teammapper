@@ -15,11 +15,12 @@ import { DialogService } from 'src/app/core/services/dialog/dialog.service';
 import { Link } from '../../../../core/models/link.model';
 import { LinksService } from '../../../../core/services/links/links.service';
 
-// Initialization process of a map:
-// 1) Render the wrapper element inside the map angular html component
-// 2) Wait for data fetching completion (triggered within application component)
-// 3) Init mmp library and fill map with data when available
-// 4) Register to server events
+// Find a node element on the page using stable attributes.
+function getNodeEl(id: string): HTMLElement | null {
+  const sel = `[data-node-id="${id}"], [data-id="${id}"], [id="${id}"]`;
+  return document.querySelector(sel) as HTMLElement | null;
+}
+
 @Component({
   selector: 'teammapper-application',
   templateUrl: './application.component.html',
@@ -29,10 +30,10 @@ import { LinksService } from '../../../../core/services/links/links.service';
 export class ApplicationComponent implements OnInit, OnDestroy {
   public node: Observable<ExportNodeProperties>;
   public editMode: Observable<boolean>;
-  public selectedNodeId: string | null = null; // first selected node
-  public cursor: { x: number; y: number } | null = null; // cursor while linking
+  public selectedNodeId: string | null = null;
+  public cursor: { x: number; y: number } | null = null;
 
-  private highlightedEl: HTMLElement | null = null; // element with outline
+  private highlightedEl: HTMLElement | null = null;
 
   private imageDropSubscription: Subscription;
   private connectionStatusSubscription: Subscription;
@@ -66,7 +67,6 @@ export class ApplicationComponent implements OnInit, OnDestroy {
       });
     this.editMode = this.settingsService.getEditModeObservable();
 
-    // reset selection when link mode is turned off
     this.linksService.linkMode$.subscribe(active => {
       if (!active) {
         this.clearSelection();
@@ -86,7 +86,6 @@ export class ApplicationComponent implements OnInit, OnDestroy {
       });
   }
 
-  // Initializes the map by either loading an existing one or creating a new one
   private async initMap() {
     const givenId: string = this.route.snapshot.paramMap.get('id');
     const modificationSecret: string = this.route.snapshot.fragment;
@@ -95,13 +94,11 @@ export class ApplicationComponent implements OnInit, OnDestroy {
       modificationSecret
     );
 
-    // If the map cannot be loaded, go to the main editor
     if (!map) {
       this.router.navigate(['/map']);
       return;
     }
 
-    // load saved links for this map
     await this.linksService.setMapId(map.uuid);
   }
 
@@ -138,28 +135,34 @@ export class ApplicationComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Listen to clicks when link mode is active
   @HostListener('document:click', ['$event'])
   public onDocumentClick(event: MouseEvent) {
     if (!this.linksService.isLinkModeActive()) return;
+
     const nodeId = this.findNodeId(event.target as HTMLElement);
     if (!nodeId) return;
+
+    const targetEl = getNodeEl(nodeId);
+    if (!targetEl) return;
+
     if (!this.selectedNodeId) {
       this.selectedNodeId = nodeId;
       this.highlight(nodeId);
     } else {
       if (this.selectedNodeId !== nodeId) {
-        let from = this.selectedNodeId;
-        let to = nodeId;
-        if (from > to) [from, to] = [to, from];
-        const link: Link = { id: `${from}-${to}`, from, to };
-        this.linksService.add(link);
+        const fromEl = getNodeEl(this.selectedNodeId);
+        if (fromEl) {
+          let from = this.selectedNodeId;
+          let to = nodeId;
+          if (from > to) [from, to] = [to, from];
+          const link: Link = { id: `${from}-${to}`, from, to };
+          this.linksService.add(link);
+        }
       }
       this.clearSelection();
     }
   }
 
-  // Track the cursor for the temporary line
   @HostListener('document:mousemove', ['$event'])
   public onDocumentMove(event: MouseEvent) {
     if (this.selectedNodeId) {
@@ -167,7 +170,6 @@ export class ApplicationComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Cancel linking with Escape
   @HostListener('document:keydown', ['$event'])
   public onKeyDown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
@@ -175,7 +177,6 @@ export class ApplicationComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Try to find a node id from the clicked element
   private findNodeId(element: HTMLElement): string | null {
     let el: HTMLElement | null = element;
     while (el && el !== document.body) {
@@ -189,19 +190,14 @@ export class ApplicationComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  // Highlight a node to show selection
   private highlight(id: string) {
     this.clearHighlight();
-    const el = document.querySelector(
-      `[data-node-id='${id}'], [data-id='${id}'], #${id}`
-    ) as HTMLElement;
-    if (el) {
-      this.highlightedEl = el;
-      el.style.outline = '2px solid #1976d2';
-    }
+    const el = getNodeEl(id);
+    if (!el) return;
+    this.highlightedEl = el;
+    el.style.outline = '2px solid #1976d2';
   }
 
-  // Remove any highlight and reset selection
   private clearSelection() {
     this.clearHighlight();
     this.selectedNodeId = null;
