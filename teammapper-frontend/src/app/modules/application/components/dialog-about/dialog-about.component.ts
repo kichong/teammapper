@@ -43,7 +43,7 @@ export class DialogAboutComponent {
 
       this.dialogRef.close();
 
-      this.router.navigate([''], {
+      this.router.navigate(['/map'], {
         queryParams: {
           toastMessage: this.translateService.instant(
             'TOASTS.DELETE_MAP_SUCCESS'

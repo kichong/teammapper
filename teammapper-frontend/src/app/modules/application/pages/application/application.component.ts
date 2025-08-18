@@ -81,9 +81,9 @@ export class ApplicationComponent implements OnInit, OnDestroy {
       modificationSecret
     );
 
-    // not found, return to start page
+    // If the map cannot be loaded, go to the main editor
     if (!map) {
-      this.router.navigate(['']);
+      this.router.navigate(['/map']);
       return;
     }
   }
@@ -103,7 +103,7 @@ export class ApplicationComponent implements OnInit, OnDestroy {
           'TOASTS.ERRORS.MAP_COULD_NOT_BE_FOUND'
         );
 
-        this.router.navigate(['/'], {
+        this.router.navigate(['/map'], {
           queryParams: {
             toastMessage: errorMessage,
             toastIsError: 1,

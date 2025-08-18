@@ -6,9 +6,8 @@ import { NotFoundComponent } from './not-found';
 const routes: Routes = [
   {
     path: '',
-    loadChildren: () =>
-      import('./modules/about/about.module').then(m => m.AboutModule),
-    canActivate: [ToastGuard],
+    redirectTo: 'map', // open mind map editor directly
+    pathMatch: 'full',
   },
   {
     path: 'map',
