@@ -10,5 +10,7 @@ div.teammapper-application {
 
   teammapper-map {
     height: 100%;
+    position: relative;
+    z-index: 1; // place nodes above links
   }
 }

@@ -1,38 +1,31 @@
 <svg class="links-svg" width="100%" height="100%">
-  <!-- area where link lines are drawn -->
+  <!-- area where link paths are drawn -->
   <ng-container *ngFor="let link of links">
-    <g (mouseenter)="hovered = link.id" (mouseleave)="hovered = null">
-      <line
-        [attr.x1]="getPos(link.fromNodeId).x"
-        [attr.y1]="getPos(link.fromNodeId).y"
-        [attr.x2]="getPos(link.toNodeId).x"
-        [attr.y2]="getPos(link.toNodeId).y"
-        [ngClass]="{ hovered: hovered === link.id }"
-        pointer-events="stroke"
-      ></line>
-      <text
-        *ngIf="hovered === link.id"
-        [attr.x]="
-          (getPos(link.fromNodeId).x + getPos(link.toNodeId).x) / 2
-        "
-        [attr.y]="
-          (getPos(link.fromNodeId).y + getPos(link.toNodeId).y) / 2
-        "
-        class="delete"
-        (click)="delete(link.id)"
-      >
-        x
-      </text>
-    </g>
+    <ng-container *ngIf="getEdgePos(link.fromNodeId, link.toNodeId) as e">
+      <g (mouseenter)="hovered = link.id" (mouseleave)="hovered = null">
+        <path
+          [attr.d]="buildCurve(e.p1, e.p2)"
+          [ngClass]="{ hovered: hovered === link.id }"
+        ></path>
+        <text
+          *ngIf="hovered === link.id"
+          [attr.x]="(e.p1.x + e.p2.x) / 2"
+          [attr.y]="(e.p1.y + e.p2.y) / 2"
+          class="delete"
+          (click)="delete(link.id)"
+        >
+          x
+        </text>
+      </g>
+    </ng-container>
   </ng-container>
 
-  <line
-    *ngIf="selectedNodeId && cursor"
-    [attr.x1]="getPos(selectedNodeId).x"
-    [attr.y1]="getPos(selectedNodeId).y"
-    [attr.x2]="cursorPos.x"
-    [attr.y2]="cursorPos.y"
-    class="temp"
-    pointer-events="none"
-  ></line>
+  <ng-container *ngIf="selectedNodeId && cursor">
+    <ng-container *ngIf="edgeFromNodeToPoint(selectedNodeId, cursorPos) as start">
+      <path
+        [attr.d]="buildCurve(start, cursorPos)"
+        class="temp"
+      ></path>
+    </ng-container>
+  </ng-container>
 </svg>
