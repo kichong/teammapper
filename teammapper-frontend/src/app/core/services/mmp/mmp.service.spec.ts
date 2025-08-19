@@ -6,6 +6,7 @@ import { UtilsService } from '../utils/utils.service';
 import * as mmp from '@mmp/index';
 import { Subject } from 'rxjs';
 import { OptionParameters } from '@mmp/map/types';
+import { LinksService } from '../links/links.service';
 
 jest.mock('dompurify', () => {
   return {
@@ -31,6 +32,7 @@ describe('MmpService', () => {
   let utilsService: Partial<jest.Mocked<UtilsService>>;
   let toastrService: Partial<jest.Mocked<ToastrService>>;
   let editModeSubject: Subject<boolean>;
+  let linksService: Partial<jest.Mocked<LinksService>>;
 
   const mockMap = {
     instance: {
@@ -101,12 +103,19 @@ describe('MmpService', () => {
       error: jest.fn(),
     };
 
+    linksService = {
+      getAll: jest.fn().mockReturnValue([]),
+      setAll: jest.fn(),
+      add: jest.fn(),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         MmpService,
         { provide: SettingsService, useValue: settingsService },
         { provide: UtilsService, useValue: utilsService },
         { provide: ToastrService, useValue: toastrService },
+        { provide: LinksService, useValue: linksService },
       ],
     });
 

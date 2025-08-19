@@ -31,7 +31,9 @@ export class LinksLayerComponent {
     // Update list of links and drop ones whose nodes are missing.
     this.linksService.links$.subscribe(links => {
       this.links = links.filter(
-        l => this.getPos(l.from).ok && this.getPos(l.to).ok
+        l =>
+          this.getPos(l.fromNodeId).ok &&
+          this.getPos(l.toNodeId).ok
       );
     });
   }
