@@ -481,20 +481,23 @@ export class MmpService implements OnDestroy {
   /**
    * Import an existing map from the local file system.
    */
-  public importMap(json: string) {
-    const parsed = JSON.parse(json);
-    if (Array.isArray(parsed)) {
-      this.linksService.setAll([]);
-      this.new(parsed);
-    } else {
-      const nodes = parsed.nodes || [];
-      const links = Array.isArray(parsed.crossLinks)
-        ? parsed.crossLinks
-        : [];
-      this.linksService.setAll(links);
-      this.new(nodes);
-    }
+public importMap(json: string) {
+  const parsed = JSON.parse(json);
+
+  if (Array.isArray(parsed)) {
+    // Old format: nodes only
+    this.new(parsed);
+    // Emit AFTER nodes mount so the layer sees them
+    setTimeout(() => this.linksService.setAll([]), 0);
+  } else {
+    const nodes = parsed.nodes || [];
+    const links = Array.isArray(parsed.crossLinks) ? parsed.crossLinks : [];
+    this.new(nodes);
+    // Emit AFTER nodes mount so the layer sees them
+    setTimeout(() => this.linksService.setAll(links), 0);
   }
+}
+
 
   /**
    * Insert an image in the selected node.
