@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { nanoid } from 'nanoid/non-secure';
 import { Link } from '../../models/link.model';
 import { StorageService } from '../storage/storage.service';
 
@@ -26,7 +27,7 @@ export class LinksService {
   public async setMapId(id: string): Promise<void> {
     this.mapId = id;
     const stored = (await this.storage.get(this.storageKey())) as Link[];
-    this.linksSubject.next(stored || []);
+    this.setAll(stored || []);
   }
 
   /** Toggle link mode on or off. */
@@ -42,12 +43,28 @@ export class LinksService {
 
   /** Add a link from one node to another. */
   public add(link: Link): void {
+    const withId = { ...link, id: link.id || `cl_${nanoid()}` };
     const links = this.linksSubject.getValue();
-    if (links.find(l => l.id === link.id)) return; // avoid duplicates
+    if (links.find(l => l.id === withId.id)) return; // avoid duplicates
 
-    const newLinks = [...links, link];
+    const newLinks = [...links, withId];
     this.linksSubject.next(newLinks);
     this.save(newLinks);
+  }
+
+  /** Return all current links. */
+  public getAll(): Link[] {
+    return this.linksSubject.getValue();
+  }
+
+  /** Replace all links with a new set. */
+  public setAll(links: Link[]): void {
+    const normalized = links.map(l => ({
+      ...l,
+      id: l.id || `cl_${nanoid()}`,
+    }));
+    this.linksSubject.next(normalized);
+    this.save(normalized);
   }
 
   /** Remove a link by its id. */

@@ -18,6 +18,7 @@ import {
 import { COLORS, EMPTY_IMAGE_DATA } from './mmp-utils';
 import { CachedMapOptions } from 'src/app/shared/models/cached-map.model';
 import { validate as uuidValidate } from 'uuid';
+import { LinksService } from '../links/links.service';
 
 /**
  * Mmp wrapper service with mmp and other functions.
@@ -36,7 +37,8 @@ export class MmpService implements OnDestroy {
   constructor(
     public settingsService: SettingsService,
     public utilsService: UtilsService,
-    public toastrService: ToastrService
+    public toastrService: ToastrService,
+    private linksService: LinksService
   ) {
     this.additionalOptions = null;
     this.branchColors = COLORS;
@@ -480,7 +482,18 @@ export class MmpService implements OnDestroy {
    * Import an existing map from the local file system.
    */
   public importMap(json: string) {
-    this.new(JSON.parse(json));
+    const parsed = JSON.parse(json);
+    if (Array.isArray(parsed)) {
+      this.linksService.setAll([]);
+      this.new(parsed);
+    } else {
+      const nodes = parsed.nodes || [];
+      const links = Array.isArray(parsed.crossLinks)
+        ? parsed.crossLinks
+        : [];
+      this.linksService.setAll(links);
+      this.new(nodes);
+    }
   }
 
   /**
@@ -655,7 +668,12 @@ export class MmpService implements OnDestroy {
     format: string,
     name: string
   ): Promise<{ success: boolean; size?: number }> {
-    const json = JSON.stringify(this.exportAsJSON());
+    const data = {
+      version: 2,
+      nodes: this.exportAsJSON(),
+      crossLinks: this.linksService.getAll(),
+    };
+    const json = JSON.stringify(data);
     const uri = `data:text/json;charset=utf-8,${encodeURIComponent(json)}`;
 
     const fileSizeKb = uri.length / 1024;

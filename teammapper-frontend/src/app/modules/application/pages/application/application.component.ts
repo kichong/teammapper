@@ -155,7 +155,11 @@ export class ApplicationComponent implements OnInit, OnDestroy {
           let from = this.selectedNodeId;
           let to = nodeId;
           if (from > to) [from, to] = [to, from];
-          const link: Link = { id: `${from}-${to}`, from, to };
+          const link: Link = {
+            id: `${from}-${to}`,
+            fromNodeId: from,
+            toNodeId: to,
+          };
           this.linksService.add(link);
         }
       }
