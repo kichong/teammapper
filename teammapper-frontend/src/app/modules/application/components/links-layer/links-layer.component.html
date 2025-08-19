@@ -2,14 +2,11 @@
   <!-- area where link lines are drawn -->
   <ng-container *ngFor="let link of links">
     <g (mouseenter)="hovered = link.id" (mouseleave)="hovered = null">
-      <line
-        [attr.x1]="getPos(link.from).x"
-        [attr.y1]="getPos(link.from).y"
-        [attr.x2]="getPos(link.to).x"
-        [attr.y2]="getPos(link.to).y"
+      <path
+        [attr.d]="path(link)"
         [ngClass]="{ hovered: hovered === link.id }"
         pointer-events="stroke"
-      ></line>
+      ></path>
       <text
         *ngIf="hovered === link.id"
         [attr.x]="(getPos(link.from).x + getPos(link.to).x) / 2"
@@ -22,13 +19,10 @@
     </g>
   </ng-container>
 
-  <line
+  <path
     *ngIf="selectedNodeId && cursor"
-    [attr.x1]="getPos(selectedNodeId).x"
-    [attr.y1]="getPos(selectedNodeId).y"
-    [attr.x2]="cursorPos.x"
-    [attr.y2]="cursorPos.y"
+    [attr.d]="tempPath()"
     class="temp"
     pointer-events="none"
-  ></line>
+  ></path>
 </svg>

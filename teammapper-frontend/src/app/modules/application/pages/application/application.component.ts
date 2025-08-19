@@ -181,9 +181,7 @@ export class ApplicationComponent implements OnInit, OnDestroy {
     let el: HTMLElement | null = element;
     while (el && el !== document.body) {
       const id =
-        el.getAttribute('data-node-id') ||
-        el.getAttribute('data-id') ||
-        el.id;
+        el.getAttribute('data-node-id') || el.getAttribute('data-id') || el.id;
       if (id) return id;
       el = el.parentElement;
     }

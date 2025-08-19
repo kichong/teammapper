@@ -42,7 +42,9 @@ export class LinksLayerComponent {
     if (!el) return { x: 0, y: 0, ok: false };
 
     const rect = el.getBoundingClientRect();
-    const hostRect = (this.elementRef.nativeElement.parentElement as HTMLElement).getBoundingClientRect();
+    const hostRect = (
+      this.elementRef.nativeElement.parentElement as HTMLElement
+    ).getBoundingClientRect();
     // Compute center of the node and adjust to the SVG's coordinate space.
     const x = rect.left + rect.width / 2 + window.scrollX;
     const y = rect.top + rect.height / 2 + window.scrollY;
@@ -54,8 +56,43 @@ export class LinksLayerComponent {
   /** Position of the mouse relative to the map wrapper. */
   public get cursorPos() {
     if (!this.cursor) return { x: 0, y: 0 };
-    const hostRect = (this.elementRef.nativeElement.parentElement as HTMLElement).getBoundingClientRect();
-    return { x: this.cursor.x - hostRect.left, y: this.cursor.y - hostRect.top };
+    const hostRect = (
+      this.elementRef.nativeElement.parentElement as HTMLElement
+    ).getBoundingClientRect();
+    return {
+      x: this.cursor.x - hostRect.left,
+      y: this.cursor.y - hostRect.top,
+    };
+  }
+
+  /**
+   * Build a curved SVG path between two nodes.
+   * Uses a cubic Bézier curve so links bend smoothly.
+   */
+  public path(link: Link): string {
+    const from = this.getPos(link.from);
+    const to = this.getPos(link.to);
+
+    // Midpoint in x-direction to shape the curve.
+    const dx = (to.x - from.x) / 2;
+
+    // Control points are halfway horizontally from each node.
+    const c1x = from.x + dx;
+    const c2x = to.x - dx;
+
+    // Construct the SVG path string.
+    return `M ${from.x} ${from.y} C ${c1x} ${from.y}, ${c2x} ${to.y}, ${to.x} ${to.y}`;
+  }
+
+  /** Path used while the user is drawing a new link. */
+  public tempPath(): string {
+    if (!this.selectedNodeId || !this.cursor) return '';
+    const from = this.getPos(this.selectedNodeId);
+    const to = this.cursorPos;
+    const dx = (to.x - from.x) / 2;
+    const c1x = from.x + dx;
+    const c2x = to.x - dx;
+    return `M ${from.x} ${from.y} C ${c1x} ${from.y}, ${c2x} ${to.y}, ${to.x} ${to.y}`;
   }
 
   /** Remove link when user clicks the small x. */

@@ -13,16 +13,17 @@
   // make the SVG fill the whole links layer
 }
 
-line {
+path {
   stroke: #666;
   stroke-width: 2;
+  fill: none; // no interior fill for paths
 }
 
-line.hovered {
+path.hovered {
   stroke: #1976d2; // blue when hovered
 }
 
-line.temp {
+path.temp {
   stroke-dasharray: 4; // dashed temporary line
 }
 
