@@ -1,22 +1,30 @@
 <svg class="links-svg" width="100%" height="100%">
   <!-- area where link lines are drawn -->
   <ng-container *ngFor="let link of links">
-    <g (mouseenter)="hovered = link.id" (mouseleave)="hovered = null">
+    <g
+      (mouseenter)="hovered = link.id"
+      (mouseleave)="hovered = null"
+      pointer-events="stroke"
+    >
       <line
-        [attr.x1]="getPos(link.fromNodeId).x"
-        [attr.y1]="getPos(link.fromNodeId).y"
-        [attr.x2]="getPos(link.toNodeId).x"
-        [attr.y2]="getPos(link.toNodeId).y"
+        [attr.x1]="getEdgePoint(link.fromNodeId, link.toNodeId).x"
+        [attr.y1]="getEdgePoint(link.fromNodeId, link.toNodeId).y"
+        [attr.x2]="getEdgePoint(link.toNodeId, link.fromNodeId).x"
+        [attr.y2]="getEdgePoint(link.toNodeId, link.fromNodeId).y"
         [ngClass]="{ hovered: hovered === link.id }"
-        pointer-events="stroke"
+        pointer-events="none"
       ></line>
       <text
         *ngIf="hovered === link.id"
         [attr.x]="
-          (getPos(link.fromNodeId).x + getPos(link.toNodeId).x) / 2
+          (getEdgePoint(link.fromNodeId, link.toNodeId).x +
+            getEdgePoint(link.toNodeId, link.fromNodeId).x) /
+          2
         "
         [attr.y]="
-          (getPos(link.fromNodeId).y + getPos(link.toNodeId).y) / 2
+          (getEdgePoint(link.fromNodeId, link.toNodeId).y +
+            getEdgePoint(link.toNodeId, link.fromNodeId).y) /
+          2
         "
         class="delete"
         (click)="delete(link.id)"
@@ -28,8 +36,8 @@
 
   <line
     *ngIf="selectedNodeId && cursor"
-    [attr.x1]="getPos(selectedNodeId).x"
-    [attr.y1]="getPos(selectedNodeId).y"
+    [attr.x1]="getEdgePoint(selectedNodeId, cursorPos).x"
+    [attr.y1]="getEdgePoint(selectedNodeId, cursorPos).y"
     [attr.x2]="cursorPos.x"
     [attr.y2]="cursorPos.y"
     class="temp"
