@@ -1,10 +1,20 @@
+## Acknowledgements
 
-# TeamMapper
+-   TeamMapper.org: https://github.com/b310-digital/teammapper
+-   Mindmapp: https://github.com/cedoor/mindmapp (discontinued)
+-   mmp: https://github.com/cedoor/mmp (discontinued)
+-   D3: https://github.com/d3/d3
+-   DomPurify: https://github.com/cure53/DOMPurify
+-   Pictograms author: Sergio Palao. Origin: ARASAAC (http://www.arasaac.org). License: CC (BY-NC-SA). Owner: Government of Aragon (Spain)
+
+----
+  
+# From TeamMapper
 ![TeamMapper Screenshot](docs/teammapper-logo.png "TeamMapper Logo")
 
 Mindmapping made simple: Host and create your own mindmaps. Share your mindmap sessions with your team and collaborate on mindmaps.
 
-TeamMapper is based on mindmapp (https://github.com/cedoor/mindmapp , discontinued). In contrast to mindmapp, TeamMapper features shared mindmapping sessions for your team based on websockets. Try it: [TeamMapper.org](https://teammapper.org)
+TeamMapper is based on mindmapp (https://github.com/cedoor/mindmapp , discontinued). In contrast to mindmapp, TeamMapper features shared mindmapping sessions for your team based on websockets. Try it: [](https://teammapper.org)
 
 ![TeamMapper Screenshot](docs/teammapper-screenshot.png?raw=true "TeamMapper Screenshot with two users")
 
@@ -235,10 +245,4 @@ be found on https://kits.blog/tools and can be used by schools for free.
 
 Logos and text provided with courtesy of kits.
 
-## Acknowledgements
 
--   *Pictograms author: Sergio Palao. Origin: ARASAAC (http://www.arasaac.org). License: CC (BY-NC-SA). Owner: Government of Aragon (Spain)
--   Mindmapp: https://github.com/cedoor/mindmapp (discontinued)
--   mmp: https://github.com/cedoor/mmp (discontinued)
--   D3: https://github.com/d3/d3
--   DomPurify: https://github.com/cure53/DOMPurify
