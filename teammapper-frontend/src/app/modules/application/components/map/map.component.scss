@@ -1,3 +1,9 @@
 div.map {
   height: 100%;
 }
+
+:host ::ng-deep [data-node-id],
+:host ::ng-deep [data-id] {
+  position: relative; // ensure z-index works
+  z-index: 2; // keep nodes above link lines
+}
