@@ -6,9 +6,15 @@ div.teammapper-application {
   .map-wrapper {
     position: relative;
     flex: 1;
-  }
 
-  teammapper-map {
-    height: 100%;
+    teammapper-map {
+      position: relative;
+      z-index: 1; // place nodes above links
+      height: 100%;
+    }
+
+    teammapper-links-layer {
+      z-index: 0; // links stay underneath nodes
+    }
   }
 }

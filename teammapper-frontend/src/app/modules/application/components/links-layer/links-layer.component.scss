@@ -5,11 +5,13 @@
   width: 100%;
   height: 100%;
   pointer-events: none; // let the map below handle normal clicks
+  z-index: 0; // sit behind node layer
 }
 
 .links-svg {
   width: 100%;
   height: 100%;
+  pointer-events: none; // avoid blocking map events
   // make the SVG fill the whole links layer
 }
 
