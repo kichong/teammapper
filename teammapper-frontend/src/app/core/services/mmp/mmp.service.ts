@@ -7,6 +7,7 @@ import { jsPDF } from 'jspdf';
 import { first } from 'rxjs/operators';
 import * as mmp from '@mmp/index';
 import MmpMap from '@mmp/map/map';
+import Node from '@mmp/map/models/node';
 import DOMPurify from 'dompurify';
 import {
   ExportHistory,
@@ -539,6 +540,60 @@ public importMap(json: string) {
    */
   public getCurrentMap(): MmpMap {
     return this.currentMap;
+  }
+
+  /**
+   * Create a smooth cubic curve between two nodes. The path starts and ends
+   * a few pixels outside each node so the line does not cover them.
+   */
+  public branchPath(fromId: string, toId: string): string {
+    if (!this.currentMap) return '';
+
+    const from: Node = this.currentMap.nodes.getNode(fromId);
+    const to: Node = this.currentMap.nodes.getNode(toId);
+    if (!from || !to) return '';
+
+    const x0 = from.coordinates.x;
+    const y0 = from.coordinates.y;
+    const x1 = to.coordinates.x;
+    const y1 = to.coordinates.y;
+
+    const r0 = Math.max(from.dimensions.width, from.dimensions.height) / 2;
+    const r1 = Math.max(to.dimensions.width, to.dimensions.height) / 2;
+    const dx = x1 - x0;
+    const dy = y1 - y0;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+    const sx = x0 + (dx / dist) * r0;
+    const sy = y0 + (dy / dist) * r0;
+    const ex = x1 - (dx / dist) * r1;
+    const ey = y1 - (dy / dist) * r1;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      const mx = (x0 + x1) / 2;
+      return `M${sx},${sy} C${mx},${sy} ${mx},${ey} ${ex},${ey}`;
+    } else {
+      const my = (y0 + y1) / 2;
+      return `M${sx},${sy} C${sx},${my} ${ex},${my} ${ex},${ey}`;
+    }
+  }
+
+  /**
+   * Return the map's current transform (translation & scale) so callers can
+   * render in the same coordinate space as mmp.
+   */
+  public mapTransform(): string {
+    if (!this.currentMap) return '';
+    return this.currentMap.dom.g.attr('transform') || '';
+  }
+
+  /**
+   * Retrieve node coordinates from the live map.
+   */
+  public nodeCoords(id: string): { x: number; y: number } | null {
+    if (!this.currentMap) return null;
+    const node: Node = this.currentMap.nodes.getNode(id);
+    return node ? { x: node.coordinates.x, y: node.coordinates.y } : null;
   }
 
   /**
