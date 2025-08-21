@@ -7,6 +7,7 @@ import { jsPDF } from 'jspdf';
 import { first } from 'rxjs/operators';
 import * as mmp from '@mmp/index';
 import MmpMap from '@mmp/map/map';
+import Node from '@mmp/map/models/node';
 import DOMPurify from 'dompurify';
 import {
   ExportHistory,
@@ -539,6 +540,45 @@ public importMap(json: string) {
    */
   public getCurrentMap(): MmpMap {
     return this.currentMap;
+  }
+
+  /**
+   * Compute a branch-like path between two nodes so cross-links can reuse
+   * the existing branch geometry. Returns an empty string if nodes are
+   * missing.
+   */
+  public branchPath(fromId: string, toId: string): string {
+    if (!this.currentMap) return '';
+
+    const from: Node = this.currentMap.nodes.getNode(fromId);
+    const to: Node = this.currentMap.nodes.getNode(toId);
+    if (!from || !to) return '';
+
+    const temp: Node = Object.assign(
+      Object.create(Object.getPrototypeOf(to)),
+      to
+    );
+    temp.parent = from;
+
+    return this.currentMap.draw.drawBranch(temp).toString();
+  }
+
+  /**
+   * Return the map's current transform (translation & scale) so callers can
+   * render in the same coordinate space as mmp.
+   */
+  public mapTransform(): string {
+    if (!this.currentMap) return '';
+    return this.currentMap.dom.g.attr('transform') || '';
+  }
+
+  /**
+   * Retrieve node coordinates from the live map.
+   */
+  public nodeCoords(id: string): { x: number; y: number } | null {
+    if (!this.currentMap) return null;
+    const node: Node = this.currentMap.nodes.getNode(id);
+    return node ? { x: node.coordinates.x, y: node.coordinates.y } : null;
   }
 
   /**

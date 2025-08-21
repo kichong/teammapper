@@ -1,6 +1,7 @@
 import { Component, Input, ElementRef } from '@angular/core';
 import { Link } from 'src/app/core/models/link.model';
 import { LinksService } from 'src/app/core/services/links/links.service';
+import { MmpService } from 'src/app/core/services/mmp/mmp.service';
 
 // Find a node element using safe attribute lookups.
 function getNodeEl(id: string): HTMLElement | null {
@@ -26,7 +27,8 @@ export class LinksLayerComponent {
 
   constructor(
     private elementRef: ElementRef<HTMLElement>,
-    private linksService: LinksService
+    private linksService: LinksService,
+    public mmpService: MmpService
   ) {
     // Update list of links and drop ones whose nodes are missing.
     this.linksService.links$.subscribe(links => {
@@ -58,6 +60,14 @@ export class LinksLayerComponent {
     if (!this.cursor) return { x: 0, y: 0 };
     const hostRect = (this.elementRef.nativeElement.parentElement as HTMLElement).getBoundingClientRect();
     return { x: this.cursor.x - hostRect.left, y: this.cursor.y - hostRect.top };
+  }
+
+  /** Midpoint between two nodes in map coordinates. */
+  public mid(link: Link) {
+    const a = this.mmpService.nodeCoords(link.fromNodeId);
+    const b = this.mmpService.nodeCoords(link.toNodeId);
+    if (!a || !b) return { x: 0, y: 0 };
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
   }
 
   /** Remove link when user clicks the small x. */
