@@ -564,6 +564,24 @@ public importMap(json: string) {
   }
 
   /**
+   * Return the map's current transform (translation & scale) so callers can
+   * render in the same coordinate space as mmp.
+   */
+  public mapTransform(): string {
+    if (!this.currentMap) return '';
+    return this.currentMap.dom.g.attr('transform') || '';
+  }
+
+  /**
+   * Retrieve node coordinates from the live map.
+   */
+  public nodeCoords(id: string): { x: number; y: number } | null {
+    if (!this.currentMap) return null;
+    const node: Node = this.currentMap.nodes.getNode(id);
+    return node ? { x: node.coordinates.x, y: node.coordinates.y } : null;
+  }
+
+  /**
    * Returns the current selected Node
    */
   public exportSelectedNode(): ExportNodeProperties {

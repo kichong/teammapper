@@ -62,6 +62,14 @@ export class LinksLayerComponent {
     return { x: this.cursor.x - hostRect.left, y: this.cursor.y - hostRect.top };
   }
 
+  /** Midpoint between two nodes in map coordinates. */
+  public mid(link: Link) {
+    const a = this.mmpService.nodeCoords(link.fromNodeId);
+    const b = this.mmpService.nodeCoords(link.toNodeId);
+    if (!a || !b) return { x: 0, y: 0 };
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  }
+
   /** Remove link when user clicks the small x. */
   public delete(id: string) {
     this.linksService.remove(id);
