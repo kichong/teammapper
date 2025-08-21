@@ -2,14 +2,13 @@
   <!-- area where link lines are drawn -->
   <ng-container *ngFor="let link of links">
     <g (mouseenter)="hovered = link.id" (mouseleave)="hovered = null">
-      <line
-        [attr.x1]="getPos(link.fromNodeId).x"
-        [attr.y1]="getPos(link.fromNodeId).y"
-        [attr.x2]="getPos(link.toNodeId).x"
-        [attr.y2]="getPos(link.toNodeId).y"
-        [ngClass]="{ hovered: hovered === link.id }"
+      <path
+        [attr.d]="mmpService.branchPath(link.fromNodeId, link.toNodeId)"
+        [attr.stroke]="hovered === link.id ? '#1976d2' : '#666'"
+        stroke-width="2"
+        fill="none"
         pointer-events="stroke"
-      ></line>
+      ></path>
       <text
         *ngIf="hovered === link.id"
         [attr.x]="

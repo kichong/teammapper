@@ -1,6 +1,7 @@
 import { Component, Input, ElementRef } from '@angular/core';
 import { Link } from 'src/app/core/models/link.model';
 import { LinksService } from 'src/app/core/services/links/links.service';
+import { MmpService } from 'src/app/core/services/mmp/mmp.service';
 
 // Find a node element using safe attribute lookups.
 function getNodeEl(id: string): HTMLElement | null {
@@ -26,7 +27,8 @@ export class LinksLayerComponent {
 
   constructor(
     private elementRef: ElementRef<HTMLElement>,
-    private linksService: LinksService
+    private linksService: LinksService,
+    public mmpService: MmpService
   ) {
     // Update list of links and drop ones whose nodes are missing.
     this.linksService.links$.subscribe(links => {
