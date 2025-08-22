@@ -5,6 +5,7 @@ import { DialogService } from 'src/app/core/services/dialog/dialog.service';
 import { MmpService } from 'src/app/core/services/mmp/mmp.service';
 import { LinksService } from 'src/app/core/services/links/links.service';
 import { environment } from 'src/environments/environment';
+import { ShapesService } from 'src/app/core/services/shapes/shapes.service';
 
 @Component({
   selector: 'teammapper-toolbar',
@@ -21,7 +22,8 @@ export class ToolbarComponent {
     private translationService: TranslateService,
     public mmpService: MmpService,
     private dialogService: DialogService,
-    public linksService: LinksService
+    public linksService: LinksService,
+    private shapesService: ShapesService
   ) {}
 
   public async exportMap(format: string) {
@@ -87,8 +89,22 @@ export class ToolbarComponent {
     this.mmpService.addNode({ detached: true, name: '' });
   }
 
+  public toggleShapeMode() {
+    this.shapesService.toggleDrawMode();
+  }
+
   public removeLink() {
     this.mmpService.removeNodeLink();
+  }
+
+  public undo() {
+    this.shapesService.undo();
+    this.mmpService.undo();
+  }
+
+  public redo() {
+    this.shapesService.redo();
+    this.mmpService.redo();
   }
 
   public toogleNodeFontWeight() {

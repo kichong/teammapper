@@ -20,6 +20,7 @@ import { COLORS, EMPTY_IMAGE_DATA } from './mmp-utils';
 import { CachedMapOptions } from 'src/app/shared/models/cached-map.model';
 import { validate as uuidValidate } from 'uuid';
 import { LinksService } from '../links/links.service';
+import { ShapesService } from '../shapes/shapes.service';
 
 /**
  * Mmp wrapper service with mmp and other functions.
@@ -39,7 +40,8 @@ export class MmpService implements OnDestroy {
     public settingsService: SettingsService,
     public utilsService: UtilsService,
     public toastrService: ToastrService,
-    private linksService: LinksService
+    private linksService: LinksService,
+    private shapesService: ShapesService
   ) {
     this.additionalOptions = null;
     this.branchColors = COLORS;
@@ -489,13 +491,20 @@ public importMap(json: string) {
     // Old format: nodes only
     this.new(parsed);
     // Emit AFTER nodes mount so the layer sees them
-    setTimeout(() => this.linksService.setAll([]), 0);
+    setTimeout(() => {
+      this.linksService.setAll([]);
+      this.shapesService.setAll([]);
+    }, 0);
   } else {
     const nodes = parsed.nodes || [];
     const links = Array.isArray(parsed.crossLinks) ? parsed.crossLinks : [];
+    const shapes = Array.isArray(parsed.shapes) ? parsed.shapes : [];
     this.new(nodes);
     // Emit AFTER nodes mount so the layer sees them
-    setTimeout(() => this.linksService.setAll(links), 0);
+    setTimeout(() => {
+      this.linksService.setAll(links);
+      this.shapesService.setAll(shapes);
+    }, 0);
   }
 }
 
@@ -730,6 +739,7 @@ public importMap(json: string) {
       version: 2,
       nodes: this.exportAsJSON(),
       crossLinks: this.linksService.getAll(),
+      shapes: this.shapesService.getAll(),
     };
     const json = JSON.stringify(data);
     const uri = `data:text/json;charset=utf-8,${encodeURIComponent(json)}`;

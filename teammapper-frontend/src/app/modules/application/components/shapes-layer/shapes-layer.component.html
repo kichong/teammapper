@@ -1,0 +1,17 @@
+<div
+  *ngFor="let shape of shapes"
+  class="shape"
+  [class.selected]="shape.id === selectedId"
+  [style.left.px]="shape.x - shape.radius"
+  [style.top.px]="shape.y - shape.radius"
+  [style.width.px]="shape.radius * 2"
+  [style.height.px]="shape.radius * 2"
+  [style.background]="shape.color"
+  (mousedown)="selectShape($event, shape.id)"
+>
+  <div
+    *ngIf="shape.id === selectedId"
+    class="resize-handle"
+    (mousedown)="startResize($event, shape)"
+  ></div>
+</div>

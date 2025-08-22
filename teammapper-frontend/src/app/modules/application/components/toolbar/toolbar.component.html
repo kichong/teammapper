@@ -86,6 +86,14 @@
     <mat-icon>share</mat-icon>
   </button>
 
+  <button
+    (click)="toggleShapeMode()"
+    title="Add circle"
+    color="primary"
+    mat-icon-button>
+    <mat-icon>panorama_fish_eye</mat-icon>
+  </button>
+
   <div class="vertical-line">
     <div></div>
   </div>
@@ -144,7 +152,7 @@
   </div>
 
   <button
-    (click)="mmpService.undo()"
+    (click)="undo()"
     [title]="'TOOLTIPS.UNDO_MAP' | translate"
     [disabled]="editDisabled || !canUndoRedo"
     color="primary"
@@ -153,7 +161,7 @@
   </button>
 
   <button
-    (click)="mmpService.redo()"
+    (click)="redo()"
     [title]="'TOOLTIPS.REDO_MAP' | translate"
     [disabled]="editDisabled || !canUndoRedo"
     color="primary"

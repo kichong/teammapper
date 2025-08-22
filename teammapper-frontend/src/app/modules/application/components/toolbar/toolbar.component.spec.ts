@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ExportNodeProperties } from '@mmp/map/types';
 import { Font } from 'mmp/src/map/models/node';
 import { of } from 'rxjs';
+import { ShapesService } from 'src/app/core/services/shapes/shapes.service';
 
 describe('ToolbarComponent', () => {
   let component: ToolbarComponent;
@@ -16,6 +17,7 @@ describe('ToolbarComponent', () => {
   let mockMmpService: jest.Mocked<MmpService>;
   let mockDialogService: jest.Mocked<DialogService>;
   let mockTranslateService: jest.Mocked<TranslateService>;
+  let mockShapesService: jest.Mocked<ShapesService>;
 
   beforeEach(async () => {
     mockMmpService = {
@@ -38,6 +40,12 @@ describe('ToolbarComponent', () => {
       openPictogramDialog: jest.fn(),
     } as unknown as jest.Mocked<DialogService>;
 
+    mockShapesService = {
+      toggleDrawMode: jest.fn(),
+      undo: jest.fn(),
+      redo: jest.fn(),
+    } as unknown as jest.Mocked<ShapesService>;
+
     mockTranslateService = {
       use: jest.fn().mockReturnValue(Promise.resolve('en')),
       get: jest.fn().mockReturnValue(of('translated value')),
@@ -59,6 +67,7 @@ describe('ToolbarComponent', () => {
         { provide: MmpService, useValue: mockMmpService },
         { provide: DialogService, useValue: mockDialogService },
         { provide: TranslateService, useValue: mockTranslateService },
+        { provide: ShapesService, useValue: mockShapesService },
       ],
     }).compileComponents();
 

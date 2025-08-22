@@ -14,6 +14,7 @@ import { ServerMap } from 'src/app/core/services/map-sync/server-types';
 import { DialogService } from 'src/app/core/services/dialog/dialog.service';
 import { Link } from '../../../../core/models/link.model';
 import { LinksService } from '../../../../core/services/links/links.service';
+import { ShapesService } from 'src/app/core/services/shapes/shapes.service';
 
 // Find a node element on the page using stable attributes.
 function getNodeEl(id: string): HTMLElement | null {
@@ -47,7 +48,8 @@ export class ApplicationComponent implements OnInit, OnDestroy {
     private utilsService: UtilsService,
     private route: ActivatedRoute,
     private router: Router,
-    private linksService: LinksService
+    private linksService: LinksService,
+    private shapesService: ShapesService
   ) {}
 
   async ngOnInit() {
@@ -100,6 +102,7 @@ export class ApplicationComponent implements OnInit, OnDestroy {
     }
 
     await this.linksService.setMapId(map.uuid);
+    await this.shapesService.setMapId(map.uuid);
   }
 
   private async loadAndPrepareWithMap(
@@ -137,6 +140,7 @@ export class ApplicationComponent implements OnInit, OnDestroy {
 
   @HostListener('document:click', ['$event'])
   public onDocumentClick(event: MouseEvent) {
+    if (this.shapesService.isDrawModeActive()) return;
     if (!this.linksService.isLinkModeActive()) return;
 
     const nodeId = this.findNodeId(event.target as HTMLElement);
@@ -178,6 +182,14 @@ export class ApplicationComponent implements OnInit, OnDestroy {
   public onKeyDown(event: KeyboardEvent) {
     if (event.key === 'Escape') {
       this.clearSelection();
+      this.shapesService.clearSelection();
+    }
+    if (event.key === 'Delete') {
+      const sel = this.shapesService.getSelected();
+      if (sel) {
+        this.shapesService.remove(sel);
+        return;
+      }
     }
   }
 
