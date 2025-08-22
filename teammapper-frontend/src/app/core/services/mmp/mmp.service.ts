@@ -543,9 +543,6 @@ public importMap(json: string) {
   }
 
   /**
-   * Compute a branch-like path between two nodes so cross-links can reuse
-   * the existing branch geometry. Returns an empty string if nodes are
-   * missing.
    */
   public branchPath(fromId: string, toId: string): string {
     if (!this.currentMap) return '';
@@ -554,13 +551,30 @@ public importMap(json: string) {
     const to: Node = this.currentMap.nodes.getNode(toId);
     if (!from || !to) return '';
 
-    const temp: Node = Object.assign(
-      Object.create(Object.getPrototypeOf(to)),
-      to
-    );
-    temp.parent = from;
+<
+    const x0 = from.coordinates.x;
+    const y0 = from.coordinates.y;
+    const x1 = to.coordinates.x;
+    const y1 = to.coordinates.y;
 
-    return this.currentMap.draw.drawBranch(temp).toString();
+    const r0 = Math.max(from.dimensions.width, from.dimensions.height) / 2;
+    const r1 = Math.max(to.dimensions.width, to.dimensions.height) / 2;
+    const dx = x1 - x0;
+    const dy = y1 - y0;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+    const sx = x0 + (dx / dist) * r0;
+    const sy = y0 + (dy / dist) * r0;
+    const ex = x1 - (dx / dist) * r1;
+    const ey = y1 - (dy / dist) * r1;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      const mx = (x0 + x1) / 2;
+      return `M${sx},${sy} C${mx},${sy} ${mx},${ey} ${ex},${ey}`;
+    } else {
+      const my = (y0 + y1) / 2;
+      return `M${sx},${sy} C${sx},${my} ${ex},${my} ${ex},${ey}`;
+    }
   }
 
   /**
