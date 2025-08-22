@@ -176,5 +176,7 @@ export interface DomElements {
     container?: any
     g?: any
     svg?: any
-    shapes?: any
+    // group holding arbitrary user-drawn shapes
+    // typed to avoid using untyped d3 selection later on
+    shapes?: d3.Selection<SVGGElement, unknown, null, undefined>
 }
