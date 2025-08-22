@@ -543,6 +543,8 @@ public importMap(json: string) {
   }
 
   /**
+   * Create a smooth cubic curve between two nodes. The path starts and ends
+   * a few pixels outside each node so the line does not cover them.
    */
   public branchPath(fromId: string, toId: string): string {
     if (!this.currentMap) return '';
@@ -551,7 +553,6 @@ public importMap(json: string) {
     const to: Node = this.currentMap.nodes.getNode(toId);
     if (!from || !to) return '';
 
-<
     const x0 = from.coordinates.x;
     const y0 = from.coordinates.y;
     const x1 = to.coordinates.x;
