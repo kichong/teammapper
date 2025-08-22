@@ -99,6 +99,14 @@
     <mat-icon>add_comment</mat-icon>
   </button>
   <button
+    (click)="addCircle()"
+    [title]="'Add circle'"
+    [disabled]="editDisabled"
+    color="primary"
+    mat-icon-button>
+    <mat-icon>radio_button_unchecked</mat-icon>
+  </button>
+  <button
     (click)="mmpService.copyNode()"
     [title]="'TOOLTIPS.COPY_NODE' | translate"
     [disabled]="editDisabled"

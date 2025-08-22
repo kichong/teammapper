@@ -1,4 +1,4 @@
-import { MapSnapshot } from '@mmp/map/types';
+import { MapData } from '@mmp/map/types';
 
 export interface CachedMapEntry {
   cachedMap: CachedMap;
@@ -8,7 +8,7 @@ export interface CachedMapEntry {
 export interface CachedMap {
   lastModified: number;
   createdAt: number;
-  data: MapSnapshot;
+  data: MapData;
   uuid: string;
   deleteAfterDays: number;
   deletedAt: number;

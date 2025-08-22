@@ -1,4 +1,4 @@
-import { MapSnapshot, ExportNodeProperties } from '@mmp/map/types';
+import { MapSnapshot, ExportNodeProperties, MapData } from '@mmp/map/types';
 import { CachedMapOptions } from 'src/app/shared/models/cached-map.model';
 
 interface ResponseServer {
@@ -58,7 +58,7 @@ interface ServerMap {
   lastModified: string;
   deletedAt: string;
   deleteAfterDays: number;
-  data: MapSnapshot;
+  data: MapData;
   options: CachedMapOptions;
   createdAt: string;
 }

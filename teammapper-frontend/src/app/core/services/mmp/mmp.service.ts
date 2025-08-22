@@ -13,6 +13,8 @@ import {
   ExportHistory,
   ExportNodeProperties,
   MapSnapshot,
+  Shape,
+  MapData,
   OptionParameters,
   UserNodeProperties,
 } from '@mmp/map/types';
@@ -90,8 +92,17 @@ export class MmpService implements OnDestroy {
   /**
    * Clear or load an existing mind mmp.
    */
-  public async new(map?: MapSnapshot, notifyWithEvent = true) {
-    const hasInvalidUUID = map.some(node => !uuidValidate(node.id));
+  public async new(map?: MapData | MapSnapshot, notifyWithEvent = true) {
+    if (!map) {
+      this.currentMap.instance.new(undefined, notifyWithEvent);
+      this.currentMap.instance.loadShapes([]);
+      return;
+    }
+
+    const nodes = Array.isArray(map) ? map : map.nodes;
+    const shapes = Array.isArray(map) ? [] : map.shapes || [];
+
+    const hasInvalidUUID = nodes.some(node => !uuidValidate(node.id));
 
     if (hasInvalidUUID) {
       const importErrorMessage = await this.utilsService.translate(
@@ -102,8 +113,9 @@ export class MmpService implements OnDestroy {
     }
 
     const mapWithCoordinates =
-      this.currentMap.instance.applyCoordinatesToMapSnapshot(map);
+      this.currentMap.instance.applyCoordinatesToMapSnapshot(nodes);
     this.currentMap.instance.new(mapWithCoordinates, notifyWithEvent);
+    this.currentMap.instance.loadShapes(shapes);
   }
 
   /**
@@ -147,6 +159,10 @@ export class MmpService implements OnDestroy {
    */
   public exportAsJSON(): MapSnapshot {
     return this.currentMap.instance.exportAsJSON();
+  }
+
+  public exportShapes(): Shape[] {
+    return this.currentMap.instance.exportShapes();
   }
 
   /**
@@ -199,6 +215,10 @@ export class MmpService implements OnDestroy {
    */
   public addNodesFromServer(nodes?: ExportNodeProperties[]) {
     this.currentMap.instance.addNodes(nodes);
+  }
+
+  public addCircle() {
+    this.currentMap.instance.addShape();
   }
 
   /**
@@ -487,13 +507,14 @@ public importMap(json: string) {
 
   if (Array.isArray(parsed)) {
     // Old format: nodes only
-    this.new(parsed);
+    this.new({ nodes: parsed, shapes: [] });
     // Emit AFTER nodes mount so the layer sees them
     setTimeout(() => this.linksService.setAll([]), 0);
   } else {
     const nodes = parsed.nodes || [];
     const links = Array.isArray(parsed.crossLinks) ? parsed.crossLinks : [];
-    this.new(nodes);
+    const shapes = Array.isArray(parsed.shapes) ? parsed.shapes : [];
+    this.new({ nodes, shapes });
     // Emit AFTER nodes mount so the layer sees them
     setTimeout(() => this.linksService.setAll(links), 0);
   }
@@ -729,6 +750,7 @@ public importMap(json: string) {
     const data = {
       version: 2,
       nodes: this.exportAsJSON(),
+      shapes: this.exportShapes(),
       crossLinks: this.linksService.getAll(),
     };
     const json = JSON.stringify(data);

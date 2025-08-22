@@ -8,6 +8,7 @@ import Drag from './handlers/drag'
 import Nodes from './handlers/nodes'
 import Export from './handlers/export'
 import CopyPaste from './handlers/copy-paste'
+import Shapes from './handlers/shapes'
 import { UserNodeProperties } from './types'
 
 /**
@@ -28,6 +29,7 @@ export default class MmpMap {
     public nodes: Nodes
     public export: Export
     public copyPaste: CopyPaste
+    public shapes: Shapes
 
     public instance: MmpInstance
 
@@ -50,6 +52,7 @@ export default class MmpMap {
         this.nodes = new Nodes(this)
         this.export = new Export(this)
         this.copyPaste = new CopyPaste(this)
+        this.shapes = new Shapes(this)
         this.rootId = ''
 
         this.draw.create()
@@ -114,6 +117,10 @@ export default class MmpMap {
             remove: this.remove,
             removeNode: this.nodes.removeNode,
             selectNode: this.nodes.selectNode,
+            addShape: this.shapes.addShape,
+            removeShape: this.shapes.removeShape,
+            exportShapes: this.shapes.export,
+            loadShapes: this.shapes.loadShapes,
             undo: this.history.undo,
             unsubscribeAll: this.events.unsubscribeAll,
             updateNode: this.nodes.updateNode,
@@ -153,6 +160,10 @@ export interface MmpInstance {
     remove: Function
     removeNode: Function
     selectNode: Function
+    addShape: Function
+    removeShape: Function
+    exportShapes: Function
+    loadShapes: Function
     undo: Function
     unsubscribeAll: Function
     updateNode: Function
@@ -165,4 +176,5 @@ export interface DomElements {
     container?: any
     g?: any
     svg?: any
+    shapes?: any
 }

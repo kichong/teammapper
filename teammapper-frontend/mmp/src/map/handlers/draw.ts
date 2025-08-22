@@ -49,6 +49,7 @@ export default class Draw {
             })
 
         this.map.dom.g = this.map.dom.svg.append('g')
+        this.map.dom.shapes = this.map.dom.g.append('g')
     }
 
     /**

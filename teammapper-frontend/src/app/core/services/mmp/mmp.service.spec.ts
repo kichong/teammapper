@@ -43,6 +43,7 @@ describe('MmpService', () => {
       zoomOut: jest.fn(),
       updateOptions: jest.fn(),
       exportAsJSON: jest.fn(),
+      exportShapes: jest.fn(),
       exportAsImage: jest.fn(),
       history: jest.fn(),
       save: jest.fn(),
@@ -68,6 +69,8 @@ describe('MmpService', () => {
       exportSelectedNode: jest.fn(),
       undo: jest.fn(),
       redo: jest.fn(),
+      loadShapes: jest.fn(),
+      addShape: jest.fn(),
     },
     options: {
       update: jest.fn(),
@@ -253,6 +256,7 @@ describe('MmpService', () => {
 
       it('should export to JSON', async () => {
         mockMap.instance.exportAsJSON.mockReturnValue({ some: 'data' });
+        mockMap.instance.exportShapes.mockReturnValue([]);
 
         const result = await service.exportMap('json');
 
