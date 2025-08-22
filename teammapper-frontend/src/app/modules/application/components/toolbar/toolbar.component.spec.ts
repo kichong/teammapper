@@ -6,9 +6,11 @@ import { ToolbarComponent } from './toolbar.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { ExportNodeProperties } from '@mmp/map/types';
 import { Font } from 'mmp/src/map/models/node';
 import { of } from 'rxjs';
+import { ShapesService } from 'src/app/core/services/shapes/shapes.service';
 
 describe('ToolbarComponent', () => {
   let component: ToolbarComponent;
@@ -16,6 +18,7 @@ describe('ToolbarComponent', () => {
   let mockMmpService: jest.Mocked<MmpService>;
   let mockDialogService: jest.Mocked<DialogService>;
   let mockTranslateService: jest.Mocked<TranslateService>;
+  let mockShapesService: jest.Mocked<ShapesService>;
 
   beforeEach(async () => {
     mockMmpService = {
@@ -38,6 +41,13 @@ describe('ToolbarComponent', () => {
       openPictogramDialog: jest.fn(),
     } as unknown as jest.Mocked<DialogService>;
 
+    mockShapesService = {
+      toggleDrawMode: jest.fn(),
+      undo: jest.fn(),
+      redo: jest.fn(),
+      drawMode$: of(false),
+    } as unknown as jest.Mocked<ShapesService>;
+
     mockTranslateService = {
       use: jest.fn().mockReturnValue(Promise.resolve('en')),
       get: jest.fn().mockReturnValue(of('translated value')),
@@ -54,11 +64,13 @@ describe('ToolbarComponent', () => {
         MatToolbarModule,
         TranslateModule.forRoot(),
         MatIconModule,
+        MatButtonModule,
       ],
       providers: [
         { provide: MmpService, useValue: mockMmpService },
         { provide: DialogService, useValue: mockDialogService },
         { provide: TranslateService, useValue: mockTranslateService },
+        { provide: ShapesService, useValue: mockShapesService },
       ],
     }).compileComponents();
 

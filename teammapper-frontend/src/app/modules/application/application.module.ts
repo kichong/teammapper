@@ -21,6 +21,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { DialogImportMermaidComponent } from './components/dialog-import-mermaid/dialog-import-mermaid.component';
 import { LinksLayerComponent } from './components/links-layer/links-layer.component';
+import { ShapesLayerComponent } from './components/shapes-layer/shapes-layer.component';
 
 @NgModule({
   imports: [
@@ -43,6 +44,7 @@ import { LinksLayerComponent } from './components/links-layer/links-layer.compon
     SliderPanelsComponent,
     ToolbarComponent,
     LinksLayerComponent,
+    ShapesLayerComponent,
     DialogConnectionInfoComponent,
     DialogShareComponent,
     DialogImportMermaidComponent,
