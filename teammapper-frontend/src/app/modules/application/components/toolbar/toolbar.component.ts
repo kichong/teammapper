@@ -23,7 +23,7 @@ export class ToolbarComponent {
     public mmpService: MmpService,
     private dialogService: DialogService,
     public linksService: LinksService,
-    private shapesService: ShapesService
+    public shapesService: ShapesService
   ) {}
 
   public async exportMap(format: string) {

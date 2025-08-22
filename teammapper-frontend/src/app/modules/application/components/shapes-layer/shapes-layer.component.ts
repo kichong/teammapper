@@ -27,6 +27,12 @@ export class ShapesLayerComponent {
   private startX = 0;
   private startY = 0;
 
+  private movingId: string | null = null;
+  private moveStartX = 0;
+  private moveStartY = 0;
+  private shapeStartX = 0;
+  private shapeStartY = 0;
+
   constructor(
     private elementRef: ElementRef<HTMLElement>,
     public shapesService: ShapesService
@@ -85,4 +91,41 @@ export class ShapesLayerComponent {
     window.removeEventListener('mousemove', this.onResize);
     window.removeEventListener('mouseup', this.stopResize);
   };
+
+  /** Start moving the shape */
+  public startMove(event: MouseEvent, shape: Shape) {
+    event.stopPropagation();
+    this.movingId = shape.id;
+    this.moveStartX = event.clientX;
+    this.moveStartY = event.clientY;
+    this.shapeStartX = shape.x;
+    this.shapeStartY = shape.y;
+    window.addEventListener('mousemove', this.onMove);
+    window.addEventListener('mouseup', this.stopMove);
+  }
+
+  private onMove = (event: MouseEvent) => {
+    if (!this.movingId) return;
+    const dx = event.clientX - this.moveStartX;
+    const dy = event.clientY - this.moveStartY;
+    this.shapesService.update(this.movingId, {
+      x: this.shapeStartX + dx,
+      y: this.shapeStartY + dy,
+    });
+  };
+
+  private stopMove = () => {
+    if (this.movingId) {
+      this.shapesService.commit();
+    }
+    this.movingId = null;
+    window.removeEventListener('mousemove', this.onMove);
+    window.removeEventListener('mouseup', this.stopMove);
+  };
+
+  /** Delete shape via handle */
+  public deleteShape(event: MouseEvent, id: string) {
+    event.stopPropagation();
+    this.shapesService.remove(id);
+  }
 }

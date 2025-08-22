@@ -7,5 +7,5 @@ export interface Shape {
   x: number; // center x in map coordinates
   y: number; // center y in map coordinates
   radius: number; // circle radius in pixels
-  color: string; // fill color
+  color: string; // border color
 }

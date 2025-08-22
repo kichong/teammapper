@@ -15,11 +15,13 @@
   position: absolute;
   border-radius: 50%;
   pointer-events: all;
-  border: 2px solid transparent;
+  border: 2px solid;
+  background: transparent;
+  box-sizing: border-box;
 }
 
 .shape.selected {
-  border-color: #1976d2;
+  outline: 2px solid #1976d2;
 }
 
 .resize-handle {
@@ -30,4 +32,35 @@
   bottom: -4px;
   background: #1976d2;
   cursor: se-resize;
+}
+
+.move-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  left: -4px;
+  top: -4px;
+  border: 2px solid #1976d2;
+  border-radius: 50%;
+  background: #fff;
+  cursor: move;
+}
+
+.delete-button {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: -8px;
+  right: -8px;
+  background: #f44336;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

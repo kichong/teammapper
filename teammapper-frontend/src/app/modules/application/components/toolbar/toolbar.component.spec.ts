@@ -6,6 +6,7 @@ import { ToolbarComponent } from './toolbar.component';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { ExportNodeProperties } from '@mmp/map/types';
 import { Font } from 'mmp/src/map/models/node';
 import { of } from 'rxjs';
@@ -44,6 +45,7 @@ describe('ToolbarComponent', () => {
       toggleDrawMode: jest.fn(),
       undo: jest.fn(),
       redo: jest.fn(),
+      drawMode$: of(false),
     } as unknown as jest.Mocked<ShapesService>;
 
     mockTranslateService = {
@@ -62,6 +64,7 @@ describe('ToolbarComponent', () => {
         MatToolbarModule,
         TranslateModule.forRoot(),
         MatIconModule,
+        MatButtonModule,
       ],
       providers: [
         { provide: MmpService, useValue: mockMmpService },

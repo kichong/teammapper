@@ -89,7 +89,7 @@
   <button
     (click)="toggleShapeMode()"
     title="Add circle"
-    color="primary"
+    [color]="(shapesService.drawMode$ | async) ? 'accent' : 'primary'"
     mat-icon-button>
     <mat-icon>panorama_fish_eye</mat-icon>
   </button>

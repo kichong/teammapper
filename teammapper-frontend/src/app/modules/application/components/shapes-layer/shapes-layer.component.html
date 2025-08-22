@@ -6,12 +6,26 @@
   [style.top.px]="shape.y - shape.radius"
   [style.width.px]="shape.radius * 2"
   [style.height.px]="shape.radius * 2"
-  [style.background]="shape.color"
+  [style.border-color]="shape.color"
   (mousedown)="selectShape($event, shape.id)"
 >
+  <button
+    *ngIf="shape.id === selectedId"
+    class="delete-button"
+    (mousedown)="deleteShape($event, shape.id)"
+  >
+    ×
+  </button>
+  <div
+    *ngIf="shape.id === selectedId"
+    class="move-handle"
+    [style.border-color]="shape.color"
+    (mousedown)="startMove($event, shape)"
+  ></div>
   <div
     *ngIf="shape.id === selectedId"
     class="resize-handle"
+    [style.background]="shape.color"
     (mousedown)="startResize($event, shape)"
   ></div>
 </div>
