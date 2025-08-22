@@ -123,7 +123,11 @@ export class ShapesService {
   /** Toggle draw mode */
   public toggleDrawMode(): void {
     const current = this.drawModeSubject.getValue();
-    this.drawModeSubject.next(!current);
+    const next = !current;
+    this.drawModeSubject.next(next);
+    if (!next) {
+      this.clearSelection();
+    }
   }
 
   public isDrawModeActive(): boolean {
