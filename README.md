@@ -1,16 +1,15 @@
 # Mindmapper
 
-Mindmapping made simple. Host your own mindmaps and collaborate with your team in real time.
+Make your own mindmaps. An expriment coding with A.I.
 
-## Features
-- Host and create mindmaps
-- Customize nodes with images, pictograms*, colors, fonts, and links
-- Share maps with view-only or edit invites
-- Import and export (JSON, Mermaid, SVG, PDF, PNG)
-- Share by URL or QR code
-- Maps are deleted after 30 days by default
+## Acknowledgements
 
-*Pictograms by Sergio Palao / ARASAAC (CC BY-NC-SA).
+- TeamMapper: https://github.com/b310-digital/teammapper
+- Mindmapp: https://github.com/cedoor/mindmapp (discontinued)
+- mmp: https://github.com/cedoor/mmp (discontinued)
+- D3: https://github.com/d3/d3
+- DOMPurify: https://github.com/cure53/DOMPurify
+- Pictograms by Sergio Palao (ARASAAC, CC BY-NC-SA), Government of Aragon (Spain)
 
 ## Getting started
 
@@ -141,11 +140,3 @@ Uncomment in `docker-compose-prod.yml`:
   docker compose --file docker-compose-prod.yml --env-file .env.prod exec app_prod npx --prefix teammapper-backend typeorm query "select * from mmp_node" --dataSource ./teammapper-backend/dist/data-source.js
   ```
 
-## Acknowledgements
-
-- TeamMapper: https://github.com/b310-digital/teammapper
-- Mindmapp: https://github.com/cedoor/mindmapp (discontinued)
-- mmp: https://github.com/cedoor/mmp (discontinued)
-- D3: https://github.com/d3/d3
-- DOMPurify: https://github.com/cure53/DOMPurify
-- Pictograms by Sergio Palao (ARASAAC, CC BY-NC-SA), Government of Aragon (Spain)
