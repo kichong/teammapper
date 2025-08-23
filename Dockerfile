@@ -46,3 +46,8 @@ RUN npm --prefix teammapper-frontend install
 
 COPY --chown=node:node teammapper-backend/package.json teammapper-backend/package-lock.json $APP_BACKEND_PATH/
 RUN npm --prefix teammapper-backend install
+
+# Add Render startup script
+COPY --chown=node:node render-start.sh /home/node/app/render-start.sh
+RUN chmod +x /home/node/app/render-start.sh
+
