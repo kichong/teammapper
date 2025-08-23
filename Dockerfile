@@ -51,3 +51,7 @@ RUN npm --prefix teammapper-backend install
 COPY --chown=node:node render-start.sh /home/node/app/render-start.sh
 RUN chmod +x /home/node/app/render-start.sh
 
+# Ensure prod entrypoint exists in the final image
+COPY --chown=node:node entrypoint.prod.sh /home/node/app/entrypoint.prod.sh
+RUN chmod +x /home/node/app/entrypoint.prod.sh
+
