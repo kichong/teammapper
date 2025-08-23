@@ -1,6 +1,6 @@
 # Mindmapper
 
-Make your own mindmaps. An expriment coding with A.I.
+Make your own mindmaps. An experiment coding with A.I.
 
 ## Acknowledgements
 
