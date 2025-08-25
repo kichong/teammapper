@@ -7,6 +7,7 @@ import {
 import { nanoid } from 'nanoid/non-secure';
 import { Shape } from 'src/app/core/models/shape.model';
 import { ShapesService } from 'src/app/core/services/shapes/shapes.service';
+import { MmpService } from 'src/app/core/services/mmp/mmp.service';
 
 /**
  * Renders and edits simple shapes (circles) on top of the map.
@@ -35,7 +36,8 @@ export class ShapesLayerComponent {
 
   constructor(
     private elementRef: ElementRef<HTMLElement>,
-    public shapesService: ShapesService
+    public shapesService: ShapesService,
+    public mmpService: MmpService
   ) {
     this.shapesService.shapes$.subscribe(s => (this.shapes = s));
     this.shapesService.selected$.subscribe(id => (this.selectedId = id));
@@ -46,14 +48,22 @@ export class ShapesLayerComponent {
     return this.drawMode;
   }
 
+  private currentScale(): number {
+    const match = this.mmpService
+      .mapTransform()
+      .match(/scale\(([^)]+)\)/);
+    return match ? parseFloat(match[1]) : 1;
+  }
+
   /** Handle clicks on empty layer to create a new circle. */
   @HostListener('click', ['$event'])
   onHostClick(event: MouseEvent) {
     if (!this.drawMode) return;
     if (event.target !== this.elementRef.nativeElement) return;
     const rect = this.elementRef.nativeElement.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const scale = this.currentScale();
+    const x = (event.clientX - rect.left) / scale;
+    const y = (event.clientY - rect.top) / scale;
     this.shapesService.add({ id: `sh_${nanoid()}`, x, y });
   }
 
@@ -76,8 +86,9 @@ export class ShapesLayerComponent {
 
   private onResize = (event: MouseEvent) => {
     if (!this.resizingId) return;
-    const dx = event.clientX - this.startX;
-    const dy = event.clientY - this.startY;
+    const scale = this.currentScale();
+    const dx = (event.clientX - this.startX) / scale;
+    const dy = (event.clientY - this.startY) / scale;
     const delta = Math.max(dx, dy);
     const newRadius = Math.max(10, this.startRadius + delta);
     this.shapesService.update(this.resizingId, { radius: newRadius });
@@ -106,8 +117,9 @@ export class ShapesLayerComponent {
 
   private onMove = (event: MouseEvent) => {
     if (!this.movingId) return;
-    const dx = event.clientX - this.moveStartX;
-    const dy = event.clientY - this.moveStartY;
+    const scale = this.currentScale();
+    const dx = (event.clientX - this.moveStartX) / scale;
+    const dy = (event.clientY - this.moveStartY) / scale;
     this.shapesService.update(this.movingId, {
       x: this.shapeStartX + dx,
       y: this.shapeStartY + dy,
