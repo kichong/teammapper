@@ -55,3 +55,6 @@ RUN chmod +x /home/node/app/render-start.sh
 COPY --chown=node:node entrypoint.prod.sh /home/node/app/entrypoint.prod.sh
 RUN chmod +x /home/node/app/entrypoint.prod.sh
 
+# Make the prod stage the final image
+FROM production
+
