@@ -1,32 +1,64 @@
-<div
-  *ngFor="let shape of shapes"
-  class="shape"
-  [class.selected]="shape.id === selectedId"
-  [style.left.px]="shape.x * scale + translateX - shape.radius * scale"
-  [style.top.px]="shape.y * scale + translateY - shape.radius * scale"
-  [style.width.px]="shape.radius * 2 * scale"
-  [style.height.px]="shape.radius * 2 * scale"
-  [style.border-color]="shape.color"
-  [style.border-width.px]="2 * scale"
-  (mousedown)="selectShape($event, shape.id)"
+<svg
+  class="shapes-svg"
+  width="100%"
+  height="100%"
+  tabindex="0"
+  (click)="onSvgClick($event)"
+  (keyup.enter)="onSvgClick($event)"
 >
-  <button
-    *ngIf="shape.id === selectedId"
-    class="delete-button"
-    (mousedown)="deleteShape($event, shape.id)"
-  >
-    ×
-  </button>
-  <div
-    *ngIf="shape.id === selectedId"
-    class="move-handle"
-    [style.border-color]="shape.color"
-    (mousedown)="startMove($event, shape)"
-  ></div>
-  <div
-    *ngIf="shape.id === selectedId"
-    class="resize-handle"
-    [style.background]="shape.color"
-    (mousedown)="startResize($event, shape)"
-  ></div>
-</div>
+  <g [attr.transform]="mmpService.mapTransform()">
+    <ng-container *ngFor="let shape of shapes">
+      <g
+        class="shape"
+        [class.selected]="shape.id === selectedId"
+        [attr.transform]="'translate(' + shape.x + ',' + shape.y + ')'"
+        (mousedown)="selectShape($event, shape.id)"
+      >
+        <circle
+          [attr.r]="shape.radius"
+          [attr.stroke]="shape.color"
+          stroke-width="2"
+          fill="transparent"
+        ></circle>
+        <ng-container *ngIf="shape.id === selectedId">
+          <circle
+            class="move-handle"
+            [attr.cx]="-shape.radius"
+            [attr.cy]="-shape.radius"
+            r="4"
+            [attr.stroke]="shape.color"
+            stroke-width="2"
+            fill="#fff"
+            (mousedown)="startMove($event, shape)"
+          ></circle>
+          <rect
+            class="resize-handle"
+            [attr.x]="shape.radius - 4"
+            [attr.y]="shape.radius - 4"
+            width="8"
+            height="8"
+            [attr.fill]="shape.color"
+            (mousedown)="startResize($event, shape)"
+          ></rect>
+          <g
+            class="delete-button"
+            [attr.transform]="'translate(' + (shape.radius + 8) + ',' + (-shape.radius - 8) + ')'"
+            (mousedown)="deleteShape($event, shape.id)"
+          >
+            <circle r="8" fill="#f44336"></circle>
+            <text
+              x="0"
+              y="0"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              fill="#fff"
+              font-size="12"
+            >
+              ×
+            </text>
+          </g>
+        </ng-container>
+      </g>
+    </ng-container>
+  </g>
+</svg>
