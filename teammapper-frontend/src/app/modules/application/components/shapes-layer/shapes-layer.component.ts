@@ -3,6 +3,8 @@ import {
   ElementRef,
   HostBinding,
   HostListener,
+  AfterViewInit,
+  OnDestroy,
 } from '@angular/core';
 import { nanoid } from 'nanoid/non-secure';
 import { Shape } from 'src/app/core/models/shape.model';
@@ -17,10 +19,14 @@ import { ShapesService } from 'src/app/core/services/shapes/shapes.service';
   styleUrls: ['./shapes-layer.component.scss'],
   standalone: false,
 })
-export class ShapesLayerComponent {
+export class ShapesLayerComponent implements AfterViewInit, OnDestroy {
   public shapes: Shape[] = [];
   public selectedId: string | null = null;
   public drawMode = false;
+
+  public scale = 1;
+  public translateX = 0;
+  public translateY = 0;
 
   private resizingId: string | null = null;
   private startRadius = 0;
@@ -33,6 +39,8 @@ export class ShapesLayerComponent {
   private shapeStartX = 0;
   private shapeStartY = 0;
 
+  private transformObserver: MutationObserver | null = null;
+
   constructor(
     private elementRef: ElementRef<HTMLElement>,
     public shapesService: ShapesService
@@ -40,6 +48,47 @@ export class ShapesLayerComponent {
     this.shapesService.shapes$.subscribe(s => (this.shapes = s));
     this.shapesService.selected$.subscribe(id => (this.selectedId = id));
     this.shapesService.drawMode$.subscribe(mode => (this.drawMode = mode));
+  }
+
+  ngAfterViewInit(): void {
+    const initObserver = () => {
+      const g = document.querySelector('#map_1 svg g');
+      if (g) {
+        this.updateTransform((g as SVGGElement).getAttribute('transform'));
+        this.transformObserver = new MutationObserver(mutations => {
+          mutations.forEach(m => {
+            if (m.attributeName === 'transform') {
+              const target = m.target as SVGGElement;
+              this.updateTransform(target.getAttribute('transform'));
+            }
+          });
+        });
+        this.transformObserver.observe(g, { attributes: true });
+      } else {
+        setTimeout(initObserver, 100);
+      }
+    };
+    initObserver();
+  }
+
+  ngOnDestroy(): void {
+    this.transformObserver?.disconnect();
+  }
+
+  private updateTransform(value: string | null) {
+    const match =
+      /translate\(([-\d.]+),\s*([-\d.]+)\)\s*scale\(([-\d.]+)\)/.exec(
+        value || ''
+      );
+    if (match) {
+      this.translateX = parseFloat(match[1]);
+      this.translateY = parseFloat(match[2]);
+      this.scale = parseFloat(match[3]);
+    } else {
+      this.translateX = 0;
+      this.translateY = 0;
+      this.scale = 1;
+    }
   }
 
   @HostBinding('class.drawing') get drawing() {
@@ -52,8 +101,10 @@ export class ShapesLayerComponent {
     if (!this.drawMode) return;
     if (event.target !== this.elementRef.nativeElement) return;
     const rect = this.elementRef.nativeElement.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const sx = event.clientX - rect.left;
+    const sy = event.clientY - rect.top;
+    const x = (sx - this.translateX) / this.scale;
+    const y = (sy - this.translateY) / this.scale;
     this.shapesService.add({ id: `sh_${nanoid()}`, x, y });
   }
 
@@ -76,8 +127,8 @@ export class ShapesLayerComponent {
 
   private onResize = (event: MouseEvent) => {
     if (!this.resizingId) return;
-    const dx = event.clientX - this.startX;
-    const dy = event.clientY - this.startY;
+    const dx = (event.clientX - this.startX) / this.scale;
+    const dy = (event.clientY - this.startY) / this.scale;
     const delta = Math.max(dx, dy);
     const newRadius = Math.max(10, this.startRadius + delta);
     this.shapesService.update(this.resizingId, { radius: newRadius });
@@ -106,8 +157,8 @@ export class ShapesLayerComponent {
 
   private onMove = (event: MouseEvent) => {
     if (!this.movingId) return;
-    const dx = event.clientX - this.moveStartX;
-    const dy = event.clientY - this.moveStartY;
+    const dx = (event.clientX - this.moveStartX) / this.scale;
+    const dy = (event.clientY - this.moveStartY) / this.scale;
     this.shapesService.update(this.movingId, {
       x: this.shapeStartX + dx,
       y: this.shapeStartY + dy,

@@ -2,11 +2,12 @@
   *ngFor="let shape of shapes"
   class="shape"
   [class.selected]="shape.id === selectedId"
-  [style.left.px]="shape.x - shape.radius"
-  [style.top.px]="shape.y - shape.radius"
-  [style.width.px]="shape.radius * 2"
-  [style.height.px]="shape.radius * 2"
+  [style.left.px]="shape.x * scale + translateX - shape.radius * scale"
+  [style.top.px]="shape.y * scale + translateY - shape.radius * scale"
+  [style.width.px]="shape.radius * 2 * scale"
+  [style.height.px]="shape.radius * 2 * scale"
   [style.border-color]="shape.color"
+  [style.border-width.px]="2 * scale"
   (mousedown)="selectShape($event, shape.id)"
 >
   <button
