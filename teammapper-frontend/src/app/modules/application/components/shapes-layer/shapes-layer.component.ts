@@ -130,13 +130,39 @@ export class ShapesLayerComponent {
 
   /** Convert screen coordinates to map space using current transform. */
   private screenToMap(sx: number, sy: number): { x: number; y: number } {
-    const matrix = new DOMMatrix(this.mmpService.mapTransform()).inverse();
+    const matrix = this.mapMatrix().inverse();
     const p = new DOMPoint(sx, sy).matrixTransform(matrix);
     return { x: p.x, y: p.y };
   }
 
   /** Current uniform scale of the map. */
   private currentScale(): number {
-    return new DOMMatrix(this.mmpService.mapTransform()).a || 1;
+    return this.mapMatrix().a || 1;
+  }
+
+  /**
+   * Build a DOMMatrix from the map's transform string. The transform is
+   * usually in the form `translate(x,y) scale(k)`, but the DOMMatrix
+   * constructor cannot parse that string directly. We extract the numbers and
+   * compose the matrix manually so click positions and scaling work in all
+   * browsers.
+   */
+  private mapMatrix(): DOMMatrix {
+    const t = this.mmpService.mapTransform();
+    if (!t) return new DOMMatrix();
+    try {
+      return new DOMMatrix(t);
+    } catch {
+      const match = t.match(
+        /translate\(([-0-9.]+)[ ,]([-0-9.]+)\)\s*scale\(([-0-9.]+)\)/
+      );
+      if (match) {
+        const [, tx, ty, k] = match;
+        return new DOMMatrix()
+          .translateSelf(parseFloat(tx), parseFloat(ty))
+          .scaleSelf(parseFloat(k));
+      }
+      return new DOMMatrix();
+    }
   }
 }
