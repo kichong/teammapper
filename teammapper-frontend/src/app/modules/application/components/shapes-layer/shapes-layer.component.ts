@@ -1,12 +1,8 @@
-import {
-  Component,
-  ElementRef,
-  HostBinding,
-  HostListener,
-} from '@angular/core';
+import { Component, ElementRef, HostBinding } from '@angular/core';
 import { nanoid } from 'nanoid/non-secure';
 import { Shape } from 'src/app/core/models/shape.model';
 import { ShapesService } from 'src/app/core/services/shapes/shapes.service';
+import { MmpService } from 'src/app/core/services/mmp/mmp.service';
 
 /**
  * Renders and edits simple shapes (circles) on top of the map.
@@ -35,7 +31,8 @@ export class ShapesLayerComponent {
 
   constructor(
     private elementRef: ElementRef<HTMLElement>,
-    public shapesService: ShapesService
+    public shapesService: ShapesService,
+    public mmpService: MmpService
   ) {
     this.shapesService.shapes$.subscribe(s => (this.shapes = s));
     this.shapesService.selected$.subscribe(id => (this.selectedId = id));
@@ -47,13 +44,13 @@ export class ShapesLayerComponent {
   }
 
   /** Handle clicks on empty layer to create a new circle. */
-  @HostListener('click', ['$event'])
-  onHostClick(event: MouseEvent) {
+  public onSvgClick(event: MouseEvent) {
     if (!this.drawMode) return;
-    if (event.target !== this.elementRef.nativeElement) return;
-    const rect = this.elementRef.nativeElement.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    if (event.target !== event.currentTarget) return;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const sx = event.clientX - rect.left;
+    const sy = event.clientY - rect.top;
+    const { x, y } = this.screenToMap(sx, sy);
     this.shapesService.add({ id: `sh_${nanoid()}`, x, y });
   }
 
@@ -76,8 +73,9 @@ export class ShapesLayerComponent {
 
   private onResize = (event: MouseEvent) => {
     if (!this.resizingId) return;
-    const dx = event.clientX - this.startX;
-    const dy = event.clientY - this.startY;
+    const scale = this.currentScale();
+    const dx = (event.clientX - this.startX) / scale;
+    const dy = (event.clientY - this.startY) / scale;
     const delta = Math.max(dx, dy);
     const newRadius = Math.max(10, this.startRadius + delta);
     this.shapesService.update(this.resizingId, { radius: newRadius });
@@ -106,8 +104,9 @@ export class ShapesLayerComponent {
 
   private onMove = (event: MouseEvent) => {
     if (!this.movingId) return;
-    const dx = event.clientX - this.moveStartX;
-    const dy = event.clientY - this.moveStartY;
+    const scale = this.currentScale();
+    const dx = (event.clientX - this.moveStartX) / scale;
+    const dy = (event.clientY - this.moveStartY) / scale;
     this.shapesService.update(this.movingId, {
       x: this.shapeStartX + dx,
       y: this.shapeStartY + dy,
@@ -127,5 +126,43 @@ export class ShapesLayerComponent {
   public deleteShape(event: MouseEvent, id: string) {
     event.stopPropagation();
     this.shapesService.remove(id);
+  }
+
+  /** Convert screen coordinates to map space using current transform. */
+  private screenToMap(sx: number, sy: number): { x: number; y: number } {
+    const matrix = this.mapMatrix().inverse();
+    const p = new DOMPoint(sx, sy).matrixTransform(matrix);
+    return { x: p.x, y: p.y };
+  }
+
+  /** Current uniform scale of the map. */
+  private currentScale(): number {
+    return this.mapMatrix().a || 1;
+  }
+
+  /**
+   * Build a DOMMatrix from the map's transform string. The transform is
+   * usually in the form `translate(x,y) scale(k)`, but the DOMMatrix
+   * constructor cannot parse that string directly. We extract the numbers and
+   * compose the matrix manually so click positions and scaling work in all
+   * browsers.
+   */
+  private mapMatrix(): DOMMatrix {
+    const t = this.mmpService.mapTransform();
+    if (!t) return new DOMMatrix();
+    try {
+      return new DOMMatrix(t);
+    } catch {
+      const match = t.match(
+        /translate\(([-0-9.]+)[ ,]([-0-9.]+)\)\s*scale\(([-0-9.]+)\)/
+      );
+      if (match) {
+        const [, tx, ty, k] = match;
+        return new DOMMatrix()
+          .translateSelf(parseFloat(tx), parseFloat(ty))
+          .scaleSelf(parseFloat(k));
+      }
+      return new DOMMatrix();
+    }
   }
 }
